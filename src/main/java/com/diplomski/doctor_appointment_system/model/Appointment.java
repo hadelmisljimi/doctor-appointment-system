@@ -11,15 +11,20 @@ public class Appointment {
 
     private String doctorId;
     private String patientId;
+
     private String date;
     private String time;
 
-    // ✔ ENUM umjesto String
     private AppointmentStatus status;
 
     public Appointment() {}
 
-    public Appointment(String id, String doctorId, String patientId, String date, String time, AppointmentStatus status) {
+    public Appointment(String id,
+                       String doctorId,
+                       String patientId,
+                       String date,
+                       String time,
+                       AppointmentStatus status) {
         this.id = id;
         this.doctorId = doctorId;
         this.patientId = patientId;
@@ -28,22 +33,46 @@ public class Appointment {
         this.status = status;
     }
 
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
+    public String getId() {
+        return id;
+    }
 
-    public String getDoctorId() { return doctorId; }
-    public void setDoctorId(String doctorId) { this.doctorId = doctorId; }
+    public void setId(String id) {
+        this.id = id;
+    }
 
-    public String getPatientId() { return patientId; }
-    public void setPatientId(String patientId) { this.patientId = patientId; }
+    public String getDoctorId() {
+        return doctorId;
+    }
 
-    public String getDate() { return date; }
-    public void setDate(String date) { this.date = date; }
+    public void setDoctorId(String doctorId) {
+        this.doctorId = doctorId;
+    }
 
-    public String getTime() { return time; }
-    public void setTime(String time) { this.time = time; }
+    public String getPatientId() {
+        return patientId;
+    }
 
-    // ✔ ENUM GETTER/SETTER
+    public void setPatientId(String patientId) {
+        this.patientId = patientId;
+    }
+
+    public String getDate() {
+        return date;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
+    }
+
+    public String getTime() {
+        return time;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
+    }
+
     public AppointmentStatus getStatus() {
         return status;
     }

@@ -12,70 +12,70 @@ import org.springframework.stereotype.Service;
 @Service
 public class AuthService {
 
-    private final UserRepository userRepository;
+    private final UserRepository repo;
     private final JwtUtil jwtUtil;
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
-    public AuthService(UserRepository userRepository, JwtUtil jwtUtil) {
-        this.userRepository = userRepository;
+    public AuthService(UserRepository repo, JwtUtil jwtUtil) {
+        this.repo = repo;
         this.jwtUtil = jwtUtil;
     }
 
     // =========================
-    // REGISTER PATIENT (PUBLIC)
+    // CORE REGISTER
     // =========================
-    public String registerPatient(AuthRequest request) {
+    private String register(AuthRequest req, Role role) {
 
-        if (userRepository.findByUsername(request.getUsername()).isPresent()) {
+        if (repo.findByUsername(req.getUsername()).isPresent()) {
             throw new RuntimeException("User already exists");
         }
 
-        User user = new User();
-        user.setUsername(request.getUsername());
-        user.setPassword(encoder.encode(request.getPassword()));
-        user.setRole(Role.PATIENT);
+        User u = new User();
+        u.setUsername(req.getUsername());
+        u.setPassword(encoder.encode(req.getPassword()));
+        u.setRole(role);
 
-        userRepository.save(user);
+        repo.save(u);
 
-        return "Patient registered successfully";
+        return "Registered successfully as " + role;
     }
 
-    // =========================
-    // REGISTER DOCTOR (ADMIN ONLY)
-    // =========================
-    public String registerDoctor(AuthRequest request) {
+    public String registerPatient(AuthRequest req) {
+        return register(req, Role.PATIENT);
+    }
 
-        if (userRepository.findByUsername(request.getUsername()).isPresent()) {
-            throw new RuntimeException("User already exists");
+    public String registerDoctor(AuthRequest req) {
+        return register(req, Role.DOCTOR);
+    }
+
+    // ONLY ONE ADMIN ALLOWED
+    public String registerAdmin(AuthRequest request) {
+
+        boolean adminExists = repo.findAll()
+                .stream()
+                .anyMatch(u -> u.getRole() == Role.ADMIN);
+
+        if (adminExists) {
+            throw new RuntimeException("Admin already exists. Only one admin allowed.");
         }
 
-        User user = new User();
-        user.setUsername(request.getUsername());
-        user.setPassword(encoder.encode(request.getPassword()));
-        user.setRole(Role.DOCTOR);
-
-        userRepository.save(user);
-
-        return "Doctor registered successfully";
+        return register(request, Role.ADMIN);
     }
 
     // =========================
     // LOGIN
     // =========================
-    public AuthResponse login(AuthRequest request) {
+    public AuthResponse login(AuthRequest req) {
 
-        User user = userRepository.findByUsername(request.getUsername())
+        User u = repo.findByUsername(req.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        if (!encoder.matches(request.getPassword(), user.getPassword())) {
+        if (!encoder.matches(req.getPassword(), u.getPassword())) {
             throw new RuntimeException("Invalid password");
         }
 
-        String token = jwtUtil.generateToken(
-                user.getUsername(),
-                user.getRole().name()
-        );
+        String token = jwtUtil.generateToken(u.getUsername(), u.getRole().name());
 
-        return new AuthResponse(token, user.getRole().name());
+        return new AuthResponse(token, u.getRole().name());
     }
 }

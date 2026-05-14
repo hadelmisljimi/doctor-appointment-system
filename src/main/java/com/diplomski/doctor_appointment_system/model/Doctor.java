@@ -11,34 +11,31 @@ public class Doctor {
     @Id
     private String id;
 
-    @NotBlank(message = "Doctor name is required")
+    @NotBlank
     private String name;
 
-    @NotBlank(message = "Specialization is required")
+    @NotBlank
     private String specialization;
 
-    @Email(message = "Invalid email format")
-    @NotBlank(message = "Email is required")
+    @Email
+    @NotBlank
     private String email;
 
-    @NotBlank(message = "Phone is required")
     private String phone;
-
-    @NotBlank(message = "Address is required")
     private String address;
-
-    @NotBlank(message = "Clinic name is required")
     private String clinicName;
-
-    @NotBlank(message = "Description is required")
     private String description;
 
-    public Doctor() {
-    }
+    public Doctor() {}
 
-    public Doctor(String id, String name, String specialization, String email,
-                  String phone, String address, String clinicName, String description) {
-
+    public Doctor(String id,
+                  String name,
+                  String specialization,
+                  String email,
+                  String phone,
+                  String address,
+                  String clinicName,
+                  String description) {
         this.id = id;
         this.name = name;
         this.specialization = specialization;
@@ -49,67 +46,28 @@ public class Doctor {
         this.description = description;
     }
 
-    public String getId() {
-        return id;
-    }
+    // GETTERS & SETTERS
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
 
-    public void setId(String id) {
-        this.id = id;
-    }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
-    public String getName() {
-        return name;
-    }
+    public String getSpecialization() { return specialization; }
+    public void setSpecialization(String specialization) { this.specialization = specialization; }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
 
-    public String getSpecialization() {
-        return specialization;
-    }
+    public String getPhone() { return phone; }
+    public void setPhone(String phone) { this.phone = phone; }
 
-    public void setSpecialization(String specialization) {
-        this.specialization = specialization;
-    }
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
 
-    public String getEmail() {
-        return email;
-    }
+    public String getClinicName() { return clinicName; }
+    public void setClinicName(String clinicName) { this.clinicName = clinicName; }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public String getClinicName() {
-        return clinicName;
-    }
-
-    public void setClinicName(String clinicName) {
-        this.clinicName = clinicName;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 }

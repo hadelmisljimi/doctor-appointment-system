@@ -1,7 +1,3 @@
-// ===============================
-// USER MODEL (FINAL VERSION)
-// ===============================
-
 package com.diplomski.doctor_appointment_system.model;
 
 import org.springframework.data.annotation.Id;
@@ -14,7 +10,7 @@ public class User {
     private String id;
 
     private String username;
-    private String password;
+    private String password; // BCrypt encoded
     private Role role;
 
     public User() {}

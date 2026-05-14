@@ -10,27 +10,16 @@ public class SearchResponseDTO {
     private List<Doctor> doctors;
     private List<Patient> patients;
 
-    public SearchResponseDTO() {
-    }
+    public SearchResponseDTO() {}
 
     public SearchResponseDTO(List<Doctor> doctors, List<Patient> patients) {
         this.doctors = doctors;
         this.patients = patients;
     }
 
-    public List<Doctor> getDoctors() {
-        return doctors;
-    }
+    public List<Doctor> getDoctors() { return doctors; }
+    public void setDoctors(List<Doctor> doctors) { this.doctors = doctors; }
 
-    public void setDoctors(List<Doctor> doctors) {
-        this.doctors = doctors;
-    }
-
-    public List<Patient> getPatients() {
-        return patients;
-    }
-
-    public void setPatients(List<Patient> patients) {
-        this.patients = patients;
-    }
+    public List<Patient> getPatients() { return patients; }
+    public void setPatients(List<Patient> patients) { this.patients = patients; }
 }

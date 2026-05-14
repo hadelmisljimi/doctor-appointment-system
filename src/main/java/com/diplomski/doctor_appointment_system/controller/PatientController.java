@@ -1,52 +1,37 @@
 package com.diplomski.doctor_appointment_system.controller;
 
 import com.diplomski.doctor_appointment_system.model.Patient;
-import com.diplomski.doctor_appointment_system.repository.PatientRepository;
-
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
-
+import com.diplomski.doctor_appointment_system.service.PatientService;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Tag(
-        name = "Patients",
-        description = "Patient management APIs"
-)
 @RestController
 @RequestMapping("/api/patients")
 public class PatientController {
 
-    private final PatientRepository patientRepository;
+    private final PatientService service;
 
-    public PatientController(
-            PatientRepository patientRepository
-    ) {
-        this.patientRepository = patientRepository;
+    public PatientController(PatientService service) {
+        this.service = service;
     }
 
-    // =========================
-    // GET ALL PATIENTS
-    // =========================
-    @Operation(
-            summary = "Get All Patients",
-            description = "Retrieve all patients"
-    )
     @GetMapping
-    public List<Patient> getAllPatients() {
-        return patientRepository.findAll();
+    public ResponseEntity<List<Patient>> getAll() {
+        return ResponseEntity.ok(service.getAll());
     }
 
-    // =========================
-    // ADD NEW PATIENT
-    // =========================
-    @Operation(
-            summary = "Add New Patient",
-            description = "Create and save new patient"
-    )
     @PostMapping
-    public Patient addPatient(@RequestBody Patient patient) {
-        return patientRepository.save(patient);
+    public ResponseEntity<Patient> create(@Valid @RequestBody Patient patient) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(service.create(patient));
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<Patient>> search(@RequestParam String q) {
+        return ResponseEntity.ok(service.search(q));
     }
 }

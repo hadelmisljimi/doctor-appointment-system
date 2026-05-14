@@ -2,8 +2,10 @@ package com.diplomski.doctor_appointment_system.controller;
 
 import com.diplomski.doctor_appointment_system.dto.AuthRequest;
 import com.diplomski.doctor_appointment_system.dto.AuthResponse;
-import com.diplomski.doctor_appointment_system.model.Role;
 import com.diplomski.doctor_appointment_system.service.AuthService;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,28 +19,24 @@ public class AuthController {
         this.authService = authService;
     }
 
-    // =========================
-    // ONLY PATIENT REGISTRATION (PUBLIC)
-    // =========================
+    // PUBLIC
     @PostMapping("/register/patient")
-    public String registerPatient(@RequestBody AuthRequest request) {
-        return authService.registerPatient(request);
+    public ResponseEntity<String> registerPatient(@Valid @RequestBody AuthRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(authService.registerPatient(request));
     }
 
-    // =========================
-    // DOCTOR REGISTRATION (ONLY ADMIN)
-    // =========================
+    // ADMIN ONLY
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/register/doctor")
-    public String registerDoctor(@RequestBody AuthRequest request) {
-        return authService.registerDoctor(request);
+    public ResponseEntity<String> registerDoctor(@Valid @RequestBody AuthRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(authService.registerDoctor(request));
     }
 
-    // =========================
     // LOGIN
-    // =========================
     @PostMapping("/login")
-    public AuthResponse login(@RequestBody AuthRequest request) {
-        return authService.login(request);
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody AuthRequest request) {
+        return ResponseEntity.ok(authService.login(request));
     }
 }

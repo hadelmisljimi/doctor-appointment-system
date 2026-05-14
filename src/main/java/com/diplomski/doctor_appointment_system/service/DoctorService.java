@@ -1,8 +1,8 @@
 package com.diplomski.doctor_appointment_system.service;
 
+import com.diplomski.doctor_appointment_system.exception.DoctorNotFoundException;
 import com.diplomski.doctor_appointment_system.model.Doctor;
 import com.diplomski.doctor_appointment_system.repository.DoctorRepository;
-import com.diplomski.doctor_appointment_system.exception.DoctorNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -10,46 +10,55 @@ import java.util.List;
 @Service
 public class DoctorService {
 
-    private final DoctorRepository doctorRepository;
+    private final DoctorRepository repo;
 
-    public DoctorService(DoctorRepository doctorRepository) {
-        this.doctorRepository = doctorRepository;
+    public DoctorService(DoctorRepository repo) {
+        this.repo = repo;
     }
 
-    public Doctor addDoctor(Doctor doctor) {
-        return doctorRepository.save(doctor);
+    public Doctor createDoctor(Doctor d) {
+        return repo.save(d);
     }
 
     public List<Doctor> getAllDoctors() {
-        return doctorRepository.findAll();
+        return repo.findAll();
     }
 
-    // ⭐ DODATO: sigurnije brisanje (pro nivo)
-    public void deleteDoctor(String id) {
-        Doctor doctor = doctorRepository.findById(id)
+    public Doctor getDoctorById(String id) {
+        return repo.findById(id)
                 .orElseThrow(() ->
-                        new DoctorNotFoundException("Doctor not found with id: " + id));
-
-        doctorRepository.delete(doctor);
+                        new DoctorNotFoundException("Doctor not found: " + id));
     }
 
-    public Doctor updateDoctor(String id, Doctor updatedDoctor) {
-
-        Doctor existingDoctor = doctorRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Doctor not found with id: " + id));
-
-        existingDoctor.setName(updatedDoctor.getName());
-        existingDoctor.setSpecialization(updatedDoctor.getSpecialization());
-        existingDoctor.setEmail(updatedDoctor.getEmail());
-        existingDoctor.setPhone(updatedDoctor.getPhone());
-        existingDoctor.setAddress(updatedDoctor.getAddress());
-        existingDoctor.setClinicName(updatedDoctor.getClinicName());
-        existingDoctor.setDescription(updatedDoctor.getDescription());
-
-        return doctorRepository.save(existingDoctor);
+    public void deleteDoctor(String id) {
+        repo.delete(getDoctorById(id));
     }
 
-    public List<Doctor> getDoctorsBySpecialization(String specialization) {
-        return doctorRepository.findBySpecializationIgnoreCase(specialization);
+    public Doctor updateDoctor(String id, Doctor d) {
+
+        Doctor existing = getDoctorById(id);
+
+        existing.setName(d.getName());
+        existing.setSpecialization(d.getSpecialization());
+        existing.setEmail(d.getEmail());
+        existing.setPhone(d.getPhone());
+        existing.setAddress(d.getAddress());
+        existing.setClinicName(d.getClinicName());
+        existing.setDescription(d.getDescription());
+
+        return repo.save(existing);
+    }
+
+    public List<Doctor> searchDoctors(String keyword) {
+
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return getAllDoctors();
+        }
+
+        return repo.searchDoctors(keyword);
+    }
+
+    public List<Doctor> getBySpecialization(String spec) {
+        return repo.findBySpecializationIgnoreCase(spec);
     }
 }

@@ -3,26 +3,20 @@ package com.diplomski.doctor_appointment_system.security;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
-    private final CustomAuthenticationEntryPoint authenticationEntryPoint;
-    private final CustomAccessDeniedHandler accessDeniedHandler;
 
-    public SecurityConfig(
-            JwtFilter jwtFilter,
-            CustomAuthenticationEntryPoint authenticationEntryPoint,
-            CustomAccessDeniedHandler accessDeniedHandler
-    ) {
+    public SecurityConfig(JwtFilter jwtFilter) {
         this.jwtFilter = jwtFilter;
-        this.authenticationEntryPoint = authenticationEntryPoint;
-        this.accessDeniedHandler = accessDeniedHandler;
     }
 
     @Bean
@@ -30,48 +24,34 @@ public class SecurityConfig {
 
         http
                 .csrf(csrf -> csrf.disable())
+
                 .sessionManagement(sm ->
                         sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
 
-                .exceptionHandling(ex -> ex
-                        .authenticationEntryPoint(authenticationEntryPoint)
-                        .accessDeniedHandler(accessDeniedHandler)
-                )
-
                 .authorizeHttpRequests(auth -> auth
 
-                        // PUBLIC AUTH
-                        .requestMatchers("/api/auth/login").permitAll()
+                        // AUTH
                         .requestMatchers("/api/auth/register/patient").permitAll()
-
-                        // ONLY ADMIN CAN REGISTER DOCTOR
-                        .requestMatchers("/api/auth/register/doctor")
-                        .hasRole("ADMIN")
+                        .requestMatchers("/api/auth/login").permitAll()
+                        .requestMatchers("/api/auth/register/doctor").hasRole("ADMIN")
 
                         // SWAGGER
-                        .requestMatchers(
-                                "/v3/api-docs/**",
-                                "/swagger-ui/**",
-                                "/swagger-ui.html"
-                        ).permitAll()
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll()
 
-                        // DOCTORS (PUBLIC GET)
+                        // DOCTORS
                         .requestMatchers(HttpMethod.GET, "/api/doctors/**").permitAll()
-
-                        // ONLY ADMIN CAN MODIFY DOCTORS
                         .requestMatchers(HttpMethod.POST, "/api/doctors/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/doctors/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/doctors/**").hasRole("ADMIN")
 
-                        // PATIENT DATA
+                        // PATIENTS
                         .requestMatchers("/api/patients/**").hasAnyRole("ADMIN", "DOCTOR")
 
                         // APPOINTMENTS
                         .requestMatchers(HttpMethod.POST, "/api/appointments/**").hasRole("PATIENT")
                         .requestMatchers(HttpMethod.PUT, "/api/appointments/**").hasAnyRole("ADMIN", "DOCTOR")
-                        .requestMatchers(HttpMethod.GET, "/api/appointments/**")
-                        .hasAnyRole("ADMIN", "DOCTOR", "PATIENT")
+                        .requestMatchers(HttpMethod.GET, "/api/appointments/**").hasAnyRole("ADMIN", "DOCTOR", "PATIENT")
 
                         .anyRequest().authenticated()
                 )

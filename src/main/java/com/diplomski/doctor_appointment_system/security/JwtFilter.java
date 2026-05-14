@@ -1,26 +1,20 @@
 package com.diplomski.doctor_appointment_system.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
-
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -42,131 +36,68 @@ public class JwtFilter extends OncePerRequestFilter {
 
         String path = request.getRequestURI();
 
-        // =========================
-        // IGNORE AUTH ENDPOINTS
-        // =========================
-        if (path.startsWith("/api/auth/")) {
+        // PUBLIC ENDPOINTS
+        if (path.startsWith("/api/auth/")
+                || path.startsWith("/v3/api-docs")
+                || path.startsWith("/swagger-ui")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        String authHeader =
-                request.getHeader("Authorization");
+        String header = request.getHeader("Authorization");
 
-        // =========================
-        // NO TOKEN
-        // =========================
-        if (authHeader == null ||
-                !authHeader.startsWith("Bearer ")) {
-
+        if (header == null || !header.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
         try {
+            String token = header.substring(7);
 
-            String token = authHeader.substring(7);
+            Claims claims = jwtUtil.extractAllClaims(token);
 
-            Claims claims =
-                    jwtUtil.extractAllClaims(token);
+            String username = claims.getSubject();
+            String role = claims.get("role", String.class);
 
-            String username =
-                    claims.getSubject();
-
-            String role =
-                    claims.get("role", String.class);
-
-            UsernamePasswordAuthenticationToken auth =
-                    new UsernamePasswordAuthenticationToken(
-                            username,
-                            null,
-                            List.of(
-                                    new SimpleGrantedAuthority(
-                                            "ROLE_" + role
-                                    )
-                            )
-                    );
-
-            SecurityContextHolder
-                    .getContext()
-                    .setAuthentication(auth);
-
-        }
-
-        // =========================
-        // TOKEN EXPIRED
-        // =========================
-        catch (ExpiredJwtException e) {
-
-            sendErrorResponse(
-                    response,
-                    request,
-                    "JWT token expired"
+            var auth = new UsernamePasswordAuthenticationToken(
+                    username,
+                    null,
+                    List.of(new SimpleGrantedAuthority("ROLE_" + role))
             );
 
+            SecurityContextHolder.getContext().setAuthentication(auth);
+
+        } catch (ExpiredJwtException e) {
+            sendError(response, 401, "JWT token expired", path);
             return;
-        }
 
-        // =========================
-        // INVALID TOKEN
-        // =========================
-        catch (JwtException e) {
-
-            sendErrorResponse(
-                    response,
-                    request,
-                    "Invalid JWT token"
-            );
-
-            return;
-        }
-
-        // =========================
-        // OTHER ERRORS
-        // =========================
-        catch (Exception e) {
-
-            sendErrorResponse(
-                    response,
-                    request,
-                    "Authentication failed"
-            );
-
+        } catch (JwtException e) {
+            sendError(response, 401, "Invalid JWT token", path);
             return;
         }
 
         filterChain.doFilter(request, response);
     }
 
-    // =========================
-    // CUSTOM JSON RESPONSE
-    // =========================
-    private void sendErrorResponse(
+    private void sendError(
             HttpServletResponse response,
-            HttpServletRequest request,
-            String message
+            int status,
+            String message,
+            String path
     ) throws IOException {
 
-        response.setStatus(
-                HttpServletResponse.SC_UNAUTHORIZED
-        );
-
         response.setContentType("application/json");
+        response.setStatus(status);
 
-        Map<String, Object> body =
-                new HashMap<>();
+        ObjectMapper mapper = new ObjectMapper();
 
-        body.put("status", 401);
-        body.put("error", "Unauthorized");
-        body.put("message", message);
-        body.put("path", request.getServletPath());
-
-        ObjectMapper mapper =
-                new ObjectMapper();
-
-        mapper.writeValue(
-                response.getOutputStream(),
-                body
+        mapper.writeValue(response.getOutputStream(),
+                Map.of(
+                        "status", status,
+                        "error", "Unauthorized",
+                        "message", message,
+                        "path", path
+                )
         );
     }
 }

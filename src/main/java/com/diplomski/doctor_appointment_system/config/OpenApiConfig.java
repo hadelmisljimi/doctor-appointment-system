@@ -2,62 +2,59 @@ package com.diplomski.doctor_appointment_system.config;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
-
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
-
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class OpenApiConfig {
 
+    private static final String SECURITY_SCHEME_NAME = "bearerAuth";
+
     @Bean
     public OpenAPI openAPI() {
-
-        final String securitySchemeName = "bearerAuth";
 
         return new OpenAPI()
 
                 // =========================
-                // API INFO
+                // API METADATA (DIPLOMSKI / ENTERPRISE STYLE)
                 // =========================
-                .info(
-                        new Info()
-                                .title("Doctor Appointment System API")
-                                .version("1.0")
-                                .description(
-                                        "REST API for managing doctors, patients and appointments"
-                                )
-                                .contact(
-                                        new Contact()
-                                                .name("Doctor Appointment System")
-                                                .email("support@doctorappointmentsystem.com")
-                                )
+                .info(new Info()
+                        .title("Doctor Appointment System REST API")
+                        .version("v1.0.0")
+                        .description(
+                                "Backend system for managing doctors, patients and appointments. " +
+                                        "JWT authentication is required for protected endpoints."
+                        )
+                        .contact(new Contact()
+                                .name("System Support")
+                                .email("support@doctorappointmentsystem.com")
+                        )
                 )
 
                 // =========================
-                // SECURITY
+                // GLOBAL SECURITY (JWT BEARER)
                 // =========================
-                .addSecurityItem(
-                        new SecurityRequirement()
-                                .addList(securitySchemeName)
+                .addSecurityItem(new SecurityRequirement()
+                        .addList(SECURITY_SCHEME_NAME)
                 )
 
-                .components(
-                        new Components()
-                                .addSecuritySchemes(
-                                        securitySchemeName,
-
-                                        new SecurityScheme()
-                                                .name(securitySchemeName)
-                                                .type(SecurityScheme.Type.HTTP)
-                                                .scheme("bearer")
-                                                .bearerFormat("JWT")
-                                )
+                .components(new Components()
+                        .addSecuritySchemes(
+                                SECURITY_SCHEME_NAME,
+                                new SecurityScheme()
+                                        .name(SECURITY_SCHEME_NAME)
+                                        .type(SecurityScheme.Type.HTTP)
+                                        .scheme("bearer")
+                                        .bearerFormat("JWT")
+                                        .description(
+                                                "Enter JWT token without 'Bearer ' prefix. " +
+                                                        "Example: eyJhbGciOiJIUzI1NiIsInR5cCI6..."
+                                        )
+                        )
                 );
     }
 }

@@ -14,126 +14,115 @@ import java.util.stream.Collectors;
 @Service
 public class AppointmentService {
 
-    private final AppointmentRepository appointmentRepository;
+    private final AppointmentRepository repository;
 
-    public AppointmentService(AppointmentRepository appointmentRepository) {
-        this.appointmentRepository = appointmentRepository;
+    public AppointmentService(AppointmentRepository repository) {
+        this.repository = repository;
     }
 
-    // -------------------------
-    // MAPPING HELPER
-    // -------------------------
-    private AppointmentResponseDTO mapToDTO(Appointment appointment) {
+    // =========================
+    // MAPPER (clean & reusable)
+    // =========================
+    private AppointmentResponseDTO map(Appointment a) {
         AppointmentResponseDTO dto = new AppointmentResponseDTO();
-        dto.setId(appointment.getId());
-        dto.setDoctorId(appointment.getDoctorId());
-        dto.setPatientId(appointment.getPatientId());
-        dto.setDate(appointment.getDate());
-        dto.setTime(appointment.getTime());
-        dto.setStatus(appointment.getStatus().name());
+        dto.setId(a.getId());
+        dto.setDoctorId(a.getDoctorId());
+        dto.setPatientId(a.getPatientId());
+        dto.setDate(a.getDate());
+        dto.setTime(a.getTime());
+        dto.setStatus(a.getStatus().name());
         return dto;
     }
 
-    // -------------------------
+    // =========================
     // GET ALL
-    // -------------------------
+    // =========================
     public List<AppointmentResponseDTO> getAllAppointments() {
-        return appointmentRepository.findAll()
+        return repository.findAll()
                 .stream()
-                .map(this::mapToDTO)
+                .map(this::map)
                 .collect(Collectors.toList());
     }
 
-    // -------------------------
-    // BOOK APPOINTMENT
-    // -------------------------
+    // =========================
+    // BOOK APPOINTMENT (SAFE)
+    // =========================
     public AppointmentResponseDTO bookAppointment(AppointmentRequestDTO dto) {
 
-        appointmentRepository.findByDoctorIdAndDateAndTime(
+        boolean exists = repository.existsByDoctorIdAndDateAndTime(
                 dto.getDoctorId(),
                 dto.getDate(),
                 dto.getTime()
-        ).ifPresent(a -> {
-            throw new RuntimeException("This time slot is already booked");
-        });
+        );
 
-        Appointment appointment = new Appointment();
-        appointment.setDoctorId(dto.getDoctorId());
-        appointment.setPatientId(dto.getPatientId());
-        appointment.setDate(dto.getDate());
-        appointment.setTime(dto.getTime());
-        appointment.setStatus(AppointmentStatus.BOOKED);
+        if (exists) {
+            throw new IllegalStateException("This time slot is already booked");
+        }
 
-        return mapToDTO(appointmentRepository.save(appointment));
+        Appointment a = new Appointment();
+        a.setDoctorId(dto.getDoctorId());
+        a.setPatientId(dto.getPatientId());
+        a.setDate(dto.getDate());
+        a.setTime(dto.getTime());
+        a.setStatus(AppointmentStatus.BOOKED);
+
+        return map(repository.save(a));
     }
 
-    // -------------------------
-    // CANCEL APPOINTMENT (FIXED RULES)
-    // -------------------------
+    // =========================
+    // CANCEL
+    // =========================
     public AppointmentResponseDTO cancelAppointment(String id) {
 
-        Appointment appointment = appointmentRepository.findById(id)
+        Appointment a = repository.findById(id)
                 .orElseThrow(() ->
-                        new AppointmentNotFoundException("Appointment not found with id: " + id));
+                        new AppointmentNotFoundException("Appointment not found: " + id));
 
-        if (appointment.getStatus() == AppointmentStatus.CANCELLED) {
-            throw new RuntimeException("Appointment is already cancelled");
+        if (a.getStatus() == AppointmentStatus.COMPLETED) {
+            throw new IllegalStateException("Completed appointment cannot be cancelled");
         }
 
-        if (appointment.getStatus() == AppointmentStatus.COMPLETED) {
-            throw new RuntimeException("Completed appointment cannot be cancelled");
-        }
+        a.setStatus(AppointmentStatus.CANCELLED);
 
-        appointment.setStatus(AppointmentStatus.CANCELLED);
-
-        return mapToDTO(appointmentRepository.save(appointment));
+        return map(repository.save(a));
     }
 
-    // -------------------------
-    // COMPLETE APPOINTMENT (FIXED RULES)
-    // -------------------------
+    // =========================
+    // COMPLETE
+    // =========================
     public AppointmentResponseDTO completeAppointment(String id) {
 
-        Appointment appointment = appointmentRepository.findById(id)
+        Appointment a = repository.findById(id)
                 .orElseThrow(() ->
-                        new AppointmentNotFoundException("Appointment not found with id: " + id));
+                        new AppointmentNotFoundException("Appointment not found: " + id));
 
-        if (appointment.getStatus() == AppointmentStatus.CANCELLED) {
-            throw new RuntimeException("Cancelled appointment cannot be completed");
+        if (a.getStatus() == AppointmentStatus.CANCELLED) {
+            throw new IllegalStateException("Cancelled appointment cannot be completed");
         }
 
-        appointment.setStatus(AppointmentStatus.COMPLETED);
+        a.setStatus(AppointmentStatus.COMPLETED);
 
-        return mapToDTO(appointmentRepository.save(appointment));
+        return map(repository.save(a));
     }
 
-    // -------------------------
-    // BY DOCTOR
-    // -------------------------
-    public List<AppointmentResponseDTO> getAppointmentsByDoctor(String doctorId) {
-        return appointmentRepository.findByDoctorId(doctorId)
-                .stream()
-                .map(this::mapToDTO)
+    // =========================
+    // FILTERS
+    // =========================
+    public List<AppointmentResponseDTO> getByDoctor(String doctorId) {
+        return repository.findByDoctorId(doctorId)
+                .stream().map(this::map)
                 .collect(Collectors.toList());
     }
 
-    // -------------------------
-    // BY PATIENT
-    // -------------------------
-    public List<AppointmentResponseDTO> getAppointmentsByPatient(String patientId) {
-        return appointmentRepository.findByPatientId(patientId)
-                .stream()
-                .map(this::mapToDTO)
+    public List<AppointmentResponseDTO> getByPatient(String patientId) {
+        return repository.findByPatientId(patientId)
+                .stream().map(this::map)
                 .collect(Collectors.toList());
     }
 
-    // -------------------------
-    // BY DATE
-    // -------------------------
-    public List<AppointmentResponseDTO> getAppointmentsByDate(String date) {
-        return appointmentRepository.findByDate(date)
-                .stream()
-                .map(this::mapToDTO)
+    public List<AppointmentResponseDTO> getByDate(String date) {
+        return repository.findByDate(date)
+                .stream().map(this::map)
                 .collect(Collectors.toList());
     }
 }

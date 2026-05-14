@@ -11,18 +11,19 @@ import java.util.Date;
 public class JwtUtil {
 
     private static final String SECRET =
-            "my-super-secret-key-my-super-secret-key";
+            "doctor-appointment-system-super-secret-key-123456";
 
     private final Key key = Keys.hmacShaKeyFor(SECRET.getBytes());
 
-    private final long EXPIRATION = 1000 * 60 * 60 * 10;
+    private static final long EXPIRATION_TIME = 1000 * 60 * 60 * 10; // 10h
 
     public String generateToken(String username, String role) {
+
         return Jwts.builder()
                 .setSubject(username)
                 .claim("role", role)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION))
+                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }

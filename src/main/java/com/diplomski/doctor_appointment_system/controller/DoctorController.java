@@ -3,88 +3,52 @@ package com.diplomski.doctor_appointment_system.controller;
 import com.diplomski.doctor_appointment_system.model.Doctor;
 import com.diplomski.doctor_appointment_system.service.DoctorService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.util.List;
 
-@Tag(
-        name = "Doctors",
-        description = "Doctor management APIs"
-)
 @RestController
 @RequestMapping("/api/doctors")
 public class DoctorController {
 
-    private final DoctorService doctorService;
+    private final DoctorService service;
 
-    public DoctorController(DoctorService doctorService) {
-        this.doctorService = doctorService;
+    public DoctorController(DoctorService service) {
+        this.service = service;
     }
 
-    // =========================
-    // ADD NEW DOCTOR
-    // =========================
-    @Operation(
-            summary = "Add New Doctor",
-            description = "Create and save a new doctor"
-    )
     @PostMapping
-    public Doctor addDoctor(@Valid @RequestBody Doctor doctor) {
-        return doctorService.addDoctor(doctor);
+    public ResponseEntity<Doctor> create(@Valid @RequestBody Doctor doctor) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(service.create(doctor));
     }
 
-    // =========================
-    // GET ALL DOCTORS
-    // =========================
-    @Operation(
-            summary = "Get All Doctors",
-            description = "Retrieve all doctors from database"
-    )
     @GetMapping
-    public List<Doctor> getAllDoctors() {
-        return doctorService.getAllDoctors();
+    public ResponseEntity<List<Doctor>> getAll() {
+        return ResponseEntity.ok(service.getAll());
     }
 
-    // =========================
-    // DELETE DOCTOR
-    // =========================
-    @Operation(
-            summary = "Delete Doctor",
-            description = "Delete doctor by ID"
-    )
-    @DeleteMapping("/{id}")
-    public void deleteDoctor(@PathVariable String id) {
-        doctorService.deleteDoctor(id);
+    @GetMapping("/{id}")
+    public ResponseEntity<Doctor> getById(@PathVariable String id) {
+        return ResponseEntity.ok(service.getById(id));
     }
 
-    // =========================
-    // UPDATE DOCTOR
-    // =========================
-    @Operation(
-            summary = "Update Doctor",
-            description = "Update existing doctor information"
-    )
     @PutMapping("/{id}")
-    public Doctor updateDoctor(@PathVariable String id,
-                               @Valid @RequestBody Doctor doctor) {
-
-        return doctorService.updateDoctor(id, doctor);
+    public ResponseEntity<Doctor> update(@PathVariable String id,
+                                         @Valid @RequestBody Doctor doctor) {
+        return ResponseEntity.ok(service.update(id, doctor));
     }
 
-    // =========================
-    // GET DOCTORS BY SPECIALIZATION
-    // =========================
-    @Operation(
-            summary = "Get Doctors By Specialization",
-            description = "Retrieve doctors filtered by specialization"
-    )
-    @GetMapping("/specialization/{specialization}")
-    public List<Doctor> getBySpecialization(
-            @PathVariable String specialization
-    ) {
-        return doctorService.getDoctorsBySpecialization(specialization);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable String id) {
+        service.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/specialization/{spec}")
+    public ResponseEntity<List<Doctor>> bySpecialization(@PathVariable String spec) {
+        return ResponseEntity.ok(service.bySpecialization(spec));
     }
 }

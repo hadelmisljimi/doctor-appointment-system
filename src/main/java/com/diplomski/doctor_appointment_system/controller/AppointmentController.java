@@ -3,125 +3,55 @@ package com.diplomski.doctor_appointment_system.controller;
 import com.diplomski.doctor_appointment_system.dto.AppointmentRequestDTO;
 import com.diplomski.doctor_appointment_system.dto.AppointmentResponseDTO;
 import com.diplomski.doctor_appointment_system.service.AppointmentService;
-
 import jakarta.validation.Valid;
-
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.util.List;
 
-@Tag(
-        name = "Appointments",
-        description = "Appointment management APIs"
-)
 @RestController
 @RequestMapping("/api/appointments")
 public class AppointmentController {
 
-    private final AppointmentService appointmentService;
+    private final AppointmentService service;
 
-    public AppointmentController(
-            AppointmentService appointmentService
-    ) {
-        this.appointmentService = appointmentService;
+    public AppointmentController(AppointmentService service) {
+        this.service = service;
     }
 
-    // =========================
-    // GET ALL APPOINTMENTS
-    // =========================
-    @Operation(
-            summary = "Get All Appointments",
-            description = "Retrieve all appointments"
-    )
     @GetMapping
-    public List<AppointmentResponseDTO> getAllAppointments() {
-        return appointmentService.getAllAppointments();
+    public ResponseEntity<List<AppointmentResponseDTO>> getAll() {
+        return ResponseEntity.ok(service.getAllAppointments());
     }
 
-    // =========================
-    // CREATE APPOINTMENT
-    // =========================
-    @Operation(
-            summary = "Create Appointment",
-            description = "Book a new appointment"
-    )
     @PostMapping
-    public AppointmentResponseDTO book(
-            @Valid @RequestBody AppointmentRequestDTO dto
-    ) {
-        return appointmentService.bookAppointment(dto);
+    public ResponseEntity<AppointmentResponseDTO> book(
+            @Valid @RequestBody AppointmentRequestDTO dto) {
+        return ResponseEntity.ok(service.book(dto));
     }
 
-    // =========================
-    // CANCEL APPOINTMENT
-    // =========================
-    @Operation(
-            summary = "Cancel Appointment",
-            description = "Cancel appointment by ID"
-    )
-    @PutMapping("/cancel/{id}")
-    public AppointmentResponseDTO cancelAppointment(
-            @PathVariable String id
-    ) {
-        return appointmentService.cancelAppointment(id);
+    @PutMapping("/{id}/cancel")
+    public ResponseEntity<AppointmentResponseDTO> cancel(@PathVariable String id) {
+        return ResponseEntity.ok(service.cancel(id));
     }
 
-    // =========================
-    // COMPLETE APPOINTMENT
-    // =========================
-    @Operation(
-            summary = "Complete Appointment",
-            description = "Mark appointment as completed"
-    )
     @PutMapping("/{id}/complete")
-    public AppointmentResponseDTO complete(
-            @PathVariable String id
-    ) {
-        return appointmentService.completeAppointment(id);
+    public ResponseEntity<AppointmentResponseDTO> complete(@PathVariable String id) {
+        return ResponseEntity.ok(service.complete(id));
     }
 
-    // =========================
-    // GET APPOINTMENTS BY DOCTOR
-    // =========================
-    @Operation(
-            summary = "Get Appointments By Doctor",
-            description = "Retrieve appointments for specific doctor"
-    )
-    @GetMapping("/doctor/{doctorId}")
-    public List<AppointmentResponseDTO> getByDoctor(
-            @PathVariable String doctorId
-    ) {
-        return appointmentService.getAppointmentsByDoctor(doctorId);
+    @GetMapping("/doctor/{id}")
+    public ResponseEntity<List<AppointmentResponseDTO>> byDoctor(@PathVariable String id) {
+        return ResponseEntity.ok(service.byDoctor(id));
     }
 
-    // =========================
-    // GET APPOINTMENTS BY PATIENT
-    // =========================
-    @Operation(
-            summary = "Get Appointments By Patient",
-            description = "Retrieve appointments for specific patient"
-    )
-    @GetMapping("/patient/{patientId}")
-    public List<AppointmentResponseDTO> getByPatient(
-            @PathVariable String patientId
-    ) {
-        return appointmentService.getAppointmentsByPatient(patientId);
+    @GetMapping("/patient/{id}")
+    public ResponseEntity<List<AppointmentResponseDTO>> byPatient(@PathVariable String id) {
+        return ResponseEntity.ok(service.byPatient(id));
     }
 
-    // =========================
-    // GET APPOINTMENTS BY DATE
-    // =========================
-    @Operation(
-            summary = "Get Appointments By Date",
-            description = "Retrieve appointments by date"
-    )
     @GetMapping("/date/{date}")
-    public List<AppointmentResponseDTO> getByDate(
-            @PathVariable String date
-    ) {
-        return appointmentService.getAppointmentsByDate(date);
+    public ResponseEntity<List<AppointmentResponseDTO>> byDate(@PathVariable String date) {
+        return ResponseEntity.ok(service.byDate(date));
     }
 }
