@@ -19,19 +19,33 @@ public class PatientController {
         this.service = service;
     }
 
+    // =========================
+    // GET ALL PATIENTS
+    // =========================
     @GetMapping
     public ResponseEntity<List<Patient>> getAll() {
         return ResponseEntity.ok(service.getAll());
     }
 
+    // =========================
+    // CREATE PATIENT
+    // =========================
     @PostMapping
-    public ResponseEntity<Patient> create(@Valid @RequestBody Patient patient) {
-        return ResponseEntity.status(HttpStatus.CREATED)
+    public ResponseEntity<Patient> create(
+            @Valid @RequestBody Patient patient
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
                 .body(service.create(patient));
     }
 
+    // =========================
+    // SEARCH PATIENTS
+    // =========================
     @GetMapping("/search")
-    public ResponseEntity<List<Patient>> search(@RequestParam String q) {
+    public ResponseEntity<List<Patient>> search(
+            @RequestParam String q
+    ) {
         return ResponseEntity.ok(service.search(q));
     }
 }

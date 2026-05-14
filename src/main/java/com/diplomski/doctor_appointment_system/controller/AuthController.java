@@ -19,24 +19,32 @@ public class AuthController {
         this.authService = authService;
     }
 
-    // PUBLIC
+    // PUBLIC - REGISTER PATIENT
     @PostMapping("/register/patient")
-    public ResponseEntity<String> registerPatient(@Valid @RequestBody AuthRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED)
+    public ResponseEntity<String> registerPatient(
+            @Valid @RequestBody AuthRequest request
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
                 .body(authService.registerPatient(request));
     }
 
-    // ADMIN ONLY
+    // ADMIN ONLY - REGISTER DOCTOR
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/register/doctor")
-    public ResponseEntity<String> registerDoctor(@Valid @RequestBody AuthRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED)
+    public ResponseEntity<String> registerDoctor(
+            @Valid @RequestBody AuthRequest request
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
                 .body(authService.registerDoctor(request));
     }
 
     // LOGIN
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@Valid @RequestBody AuthRequest request) {
+    public ResponseEntity<AuthResponse> login(
+            @Valid @RequestBody AuthRequest request
+    ) {
         return ResponseEntity.ok(authService.login(request));
     }
 }

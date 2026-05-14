@@ -19,9 +19,16 @@ public class SearchService {
 
     public SearchResponseDTO search(String q) {
 
+        if (q == null || q.trim().isEmpty()) {
+            return new SearchResponseDTO(
+                    doctorRepo.findAll(),
+                    patientRepo.findAll()
+            );
+        }
+
         return new SearchResponseDTO(
-                doctorRepo.search(q),
-                patientRepo.search(q)
+                doctorRepo.searchDoctors(q),
+                patientRepo.searchPatients(q)
         );
     }
 }

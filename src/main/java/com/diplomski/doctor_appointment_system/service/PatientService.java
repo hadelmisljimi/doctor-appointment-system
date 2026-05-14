@@ -15,20 +15,29 @@ public class PatientService {
         this.repo = repo;
     }
 
+    // =========================
+    // GET ALL
+    // =========================
     public List<Patient> getAll() {
         return repo.findAll();
     }
 
-    public Patient create(Patient p) {
-        return repo.save(p);
+    // =========================
+    // CREATE
+    // =========================
+    public Patient create(Patient patient) {
+        return repo.save(patient);
     }
 
+    // =========================
+    // SEARCH
+    // =========================
     public List<Patient> search(String keyword) {
 
         if (keyword == null || keyword.isBlank()) {
             return getAll();
         }
 
-        return repo.search(keyword);
+        return repo.searchPatients(keyword);
     }
 }

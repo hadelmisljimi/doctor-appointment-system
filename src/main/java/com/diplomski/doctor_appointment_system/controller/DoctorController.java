@@ -19,36 +19,62 @@ public class DoctorController {
         this.service = service;
     }
 
+    // =========================
+    // CREATE DOCTOR
+    // =========================
     @PostMapping
     public ResponseEntity<Doctor> create(@Valid @RequestBody Doctor doctor) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(service.create(doctor));
+                .body(service.createDoctor(doctor));
     }
 
+    // =========================
+    // GET ALL DOCTORS
+    // =========================
     @GetMapping
     public ResponseEntity<List<Doctor>> getAll() {
-        return ResponseEntity.ok(service.getAll());
+        return ResponseEntity.ok(service.getAllDoctors());
     }
 
+    // =========================
+    // GET BY ID
+    // =========================
     @GetMapping("/{id}")
     public ResponseEntity<Doctor> getById(@PathVariable String id) {
-        return ResponseEntity.ok(service.getById(id));
+        return ResponseEntity.ok(service.getDoctorById(id));
     }
 
+    // =========================
+    // UPDATE DOCTOR
+    // =========================
     @PutMapping("/{id}")
     public ResponseEntity<Doctor> update(@PathVariable String id,
                                          @Valid @RequestBody Doctor doctor) {
-        return ResponseEntity.ok(service.update(id, doctor));
+        return ResponseEntity.ok(service.updateDoctor(id, doctor));
     }
 
+    // =========================
+    // DELETE DOCTOR
+    // =========================
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable String id) {
-        service.delete(id);
+        service.deleteDoctor(id);
         return ResponseEntity.noContent().build();
     }
 
+    // =========================
+    // FILTER BY SPECIALIZATION
+    // =========================
     @GetMapping("/specialization/{spec}")
     public ResponseEntity<List<Doctor>> bySpecialization(@PathVariable String spec) {
-        return ResponseEntity.ok(service.bySpecialization(spec));
+        return ResponseEntity.ok(service.getBySpecialization(spec));
+    }
+
+    // =========================
+    // SEARCH DOCTORS
+    // =========================
+    @GetMapping("/search")
+    public ResponseEntity<List<Doctor>> search(@RequestParam String q) {
+        return ResponseEntity.ok(service.searchDoctors(q));
     }
 }

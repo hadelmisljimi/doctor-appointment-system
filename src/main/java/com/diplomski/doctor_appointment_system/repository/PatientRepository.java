@@ -9,19 +9,10 @@ import java.util.Optional;
 
 public interface PatientRepository extends MongoRepository<Patient, String> {
 
-    // =========================
-    // FIND BY EMAIL
-    // =========================
     Optional<Patient> findByEmail(String email);
 
-    // =========================
-    // CHECK UNIQUE EMAIL
-    // =========================
     boolean existsByEmail(String email);
 
-    // =========================
-    // GLOBAL SEARCH (PRO LEVEL)
-    // =========================
     @Query("""
         {
           $or: [
@@ -31,5 +22,5 @@ public interface PatientRepository extends MongoRepository<Patient, String> {
           ]
         }
     """)
-    List<Patient> search(String keyword);
+    List<Patient> searchPatients(String keyword);
 }

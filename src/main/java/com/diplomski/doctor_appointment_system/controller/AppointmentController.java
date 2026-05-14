@@ -19,39 +19,61 @@ public class AppointmentController {
         this.service = service;
     }
 
+    // =========================
+    // GET ALL
+    // =========================
     @GetMapping
     public ResponseEntity<List<AppointmentResponseDTO>> getAll() {
         return ResponseEntity.ok(service.getAllAppointments());
     }
 
+    // =========================
+    // BOOK
+    // =========================
     @PostMapping
     public ResponseEntity<AppointmentResponseDTO> book(
             @Valid @RequestBody AppointmentRequestDTO dto) {
-        return ResponseEntity.ok(service.book(dto));
+
+        return ResponseEntity.ok(service.bookAppointment(dto));
     }
 
+    // =========================
+    // CANCEL
+    // =========================
     @PutMapping("/{id}/cancel")
     public ResponseEntity<AppointmentResponseDTO> cancel(@PathVariable String id) {
-        return ResponseEntity.ok(service.cancel(id));
+        return ResponseEntity.ok(service.cancelAppointment(id));
     }
 
+    // =========================
+    // COMPLETE
+    // =========================
     @PutMapping("/{id}/complete")
     public ResponseEntity<AppointmentResponseDTO> complete(@PathVariable String id) {
-        return ResponseEntity.ok(service.complete(id));
+        return ResponseEntity.ok(service.completeAppointment(id));
     }
 
+    // =========================
+    // BY DOCTOR
+    // =========================
     @GetMapping("/doctor/{id}")
     public ResponseEntity<List<AppointmentResponseDTO>> byDoctor(@PathVariable String id) {
-        return ResponseEntity.ok(service.byDoctor(id));
+        return ResponseEntity.ok(service.getByDoctor(id));
     }
 
+    // =========================
+    // BY PATIENT
+    // =========================
     @GetMapping("/patient/{id}")
     public ResponseEntity<List<AppointmentResponseDTO>> byPatient(@PathVariable String id) {
-        return ResponseEntity.ok(service.byPatient(id));
+        return ResponseEntity.ok(service.getByPatient(id));
     }
 
+    // =========================
+    // BY DATE
+    // =========================
     @GetMapping("/date/{date}")
     public ResponseEntity<List<AppointmentResponseDTO>> byDate(@PathVariable String date) {
-        return ResponseEntity.ok(service.byDate(date));
+        return ResponseEntity.ok(service.getByDate(date));
     }
 }
