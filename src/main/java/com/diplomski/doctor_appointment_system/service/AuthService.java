@@ -13,14 +13,18 @@ import org.springframework.stereotype.Service;
 public class AuthService {
 
     private final UserRepository userRepository;
-    private final JwtUtil jwtUtil = new JwtUtil();
+    private final JwtUtil jwtUtil;
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
-    public AuthService(UserRepository userRepository) {
+    public AuthService(UserRepository userRepository, JwtUtil jwtUtil) {
         this.userRepository = userRepository;
+        this.jwtUtil = jwtUtil;
     }
 
-    public String register(AuthRequest request, Role role) {
+    // =========================
+    // REGISTER PATIENT (PUBLIC)
+    // =========================
+    public String registerPatient(AuthRequest request) {
 
         if (userRepository.findByUsername(request.getUsername()).isPresent()) {
             throw new RuntimeException("User already exists");
@@ -29,13 +33,35 @@ public class AuthService {
         User user = new User();
         user.setUsername(request.getUsername());
         user.setPassword(encoder.encode(request.getPassword()));
-        user.setRole(role);
+        user.setRole(Role.PATIENT);
 
         userRepository.save(user);
 
-        return "User registered successfully";
+        return "Patient registered successfully";
     }
 
+    // =========================
+    // REGISTER DOCTOR (ADMIN ONLY)
+    // =========================
+    public String registerDoctor(AuthRequest request) {
+
+        if (userRepository.findByUsername(request.getUsername()).isPresent()) {
+            throw new RuntimeException("User already exists");
+        }
+
+        User user = new User();
+        user.setUsername(request.getUsername());
+        user.setPassword(encoder.encode(request.getPassword()));
+        user.setRole(Role.DOCTOR);
+
+        userRepository.save(user);
+
+        return "Doctor registered successfully";
+    }
+
+    // =========================
+    // LOGIN
+    // =========================
     public AuthResponse login(AuthRequest request) {
 
         User user = userRepository.findByUsername(request.getUsername())

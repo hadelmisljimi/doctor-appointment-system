@@ -28,4 +28,9 @@ public class AuthResponse {
     public void setRole(String role) {
         this.role = role;
     }
+
+    public String getShortToken() {
+        if (token == null) return null;
+        return token.substring(0, Math.min(25, token.length())) + "...";
+    }
 }

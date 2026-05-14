@@ -1,8 +1,14 @@
 package com.diplomski.doctor_appointment_system.config;
 
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
+
+import io.swagger.v3.oas.models.info.Contact;
+import io.swagger.v3.oas.models.info.Info;
+
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -11,15 +17,47 @@ public class OpenApiConfig {
 
     @Bean
     public OpenAPI openAPI() {
+
+        final String securitySchemeName = "bearerAuth";
+
         return new OpenAPI()
-                .addSecurityItem(new SecurityRequirement().addList("bearerAuth"))
-                .components(new io.swagger.v3.oas.models.Components()
-                        .addSecuritySchemes("bearerAuth",
-                                new SecurityScheme()
-                                        .type(SecurityScheme.Type.HTTP)
-                                        .scheme("bearer")
-                                        .bearerFormat("JWT")
-                        )
+
+                // =========================
+                // API INFO
+                // =========================
+                .info(
+                        new Info()
+                                .title("Doctor Appointment System API")
+                                .version("1.0")
+                                .description(
+                                        "REST API for managing doctors, patients and appointments"
+                                )
+                                .contact(
+                                        new Contact()
+                                                .name("Doctor Appointment System")
+                                                .email("support@doctorappointmentsystem.com")
+                                )
+                )
+
+                // =========================
+                // SECURITY
+                // =========================
+                .addSecurityItem(
+                        new SecurityRequirement()
+                                .addList(securitySchemeName)
+                )
+
+                .components(
+                        new Components()
+                                .addSecuritySchemes(
+                                        securitySchemeName,
+
+                                        new SecurityScheme()
+                                                .name(securitySchemeName)
+                                                .type(SecurityScheme.Type.HTTP)
+                                                .scheme("bearer")
+                                                .bearerFormat("JWT")
+                                )
                 );
     }
 }

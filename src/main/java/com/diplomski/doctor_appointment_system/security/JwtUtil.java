@@ -1,8 +1,6 @@
 package com.diplomski.doctor_appointment_system.security;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Component;
 
@@ -12,14 +10,13 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    // 🔥 FIX: STATIC KEY (NE SMIJE SE MIJENJATI NA RESTART)
-    private final Key key = Keys.hmacShaKeyFor(
-            "mySecretKeymySecretKeymySecretKeymySecretKey".getBytes()
-    );
+    private static final String SECRET =
+            "my-super-secret-key-my-super-secret-key";
 
-    private final long EXPIRATION = 1000 * 60 * 60 * 10; // 10h
+    private final Key key = Keys.hmacShaKeyFor(SECRET.getBytes());
 
-    // GENERATE TOKEN
+    private final long EXPIRATION = 1000 * 60 * 60 * 10;
+
     public String generateToken(String username, String role) {
         return Jwts.builder()
                 .setSubject(username)
@@ -30,7 +27,6 @@ public class JwtUtil {
                 .compact();
     }
 
-    // EXTRACT CLAIMS
     public Claims extractAllClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(key)
