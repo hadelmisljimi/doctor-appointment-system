@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Doctor System Pro Panel</title>
+
+    <style>
+body {
+    margin: 0;
+    font-family: Arial;
+    background: #eef4ff;
+}
+
+/* SIDEBAR */
+.sidebar {
+    width: 250px;
+    height: 100vh;
+    background: #0b3d91;
+    color: white;
+    position: fixed;
+}
+
+.sidebar h2 {
+    text-align: center;
+    padding: 15px;
+}
+
+.menu button {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    background: none;
+    color: white;
+    text-align: left;
+    cursor: pointer;
+}
+
+.menu button:hover {
+    background: #1565c0;
+}
+
+/* MAIN */
+.main {
+    margin-left: 260px;
+    padding: 20px;
+}
+
+.card {
+    background: white;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+}
+
+/* POPUP */
+.popup {
+    display: none;
+    position: fixed;
+    top: 20%;
+    left: 35%;
+    width: 350px;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    margin: 5px 0;
+}
+
+button.action {
+    background: #1976d2;
+    color: white;
+    padding: 10px;
+    border: none;
+    width: 100%;
+}
+
+button.action:hover {
+    background: #0b3d91;
+}
+
+.badge {
+    background: green;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 5px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="sidebar">
+    <h2>DOCTOR SYSTEM</h2>
+
+    <div class="menu">
+        <button onclick="openLogin()">Login</button>
+        <button onclick="loadDoctors()">Doctors</button>
+        <button onclick="loadPatients()">Patients</button>
+        <button onclick="copyToken()">Copy Token</button>
+        <button onclick="logout()">Logout</button>
+    </div>
+</div>
+
+<div class="main">
+    <h2 id="status">Not logged in</h2>
+    <div id="content"></div>
+</div>
+
+<!-- LOGIN -->
+<div class="popup" id="loginPopup">
+    <h3>Login</h3>
+
+    <input id="username" placeholder="username">
+    <input id="password" placeholder="password">
+
+    <button class="action" onclick="login()">LOGIN</button>
+
+    <p id="error" style="color:red"></p>
+</div>
+
+<script>
+
+let token = "";
+let role = "";
+
+/* DEMO ADMIN LOGIN (UI LEVEL ONLY) */
+if (localStorage.getItem("admin") === "true") {
+    token = "demo-token";
+    role = "ADMIN";
+}
+
+/* LOGIN POPUP */
+function openLogin() {
+    document.getElementById("loginPopup").style.display = "block";
+}
+
+/* LOGIN */
+async function login() {
+
+    let u = document.getElementById("username").value;
+    let p = document.getElementById("password").value;
+
+    /* DEMO ADMIN */
+    if (u === "admin" && p === "123") {
+        role = "ADMIN";
+        token = "demo-token-admin";
+
+        document.getElementById("status").innerText =
+            "Logged in as admin";
+
+        localStorage.setItem("admin", "true");
+        document.getElementById("loginPopup").style.display = "none";
+        return;
+    }
+
+    /* BACKEND LOGIN */
+    let res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({username:u, password:p})
+    });
+
+    if (!res.ok) {
+        document.getElementById("error").innerText = "Wrong login";
+        return;
+    }
+
+    let data = await res.json();
+    token = data.token;
+    role = data.role;
+
+    document.getElementById("status").innerText =
+        "Logged in as " + role;
+
+    document.getElementById("loginPopup").style.display = "none";
+}
+
+/* COPY TOKEN */
+function copyToken() {
+    if (!token) return alert("No token");
+
+    navigator.clipboard.writeText(token);
+    alert("Token copied!");
+}
+
+/* LOAD DOCTORS */
+async function loadDoctors() {
+
+    let res = await fetch("/api/doctors", {
+        headers: {"Authorization":"Bearer " + token}
+    });
+
+    if (!res.ok) return alert("No access");
+
+    let data = await res.json();
+
+    let html = "<h3>Doctors</h3>";
+
+    data.forEach(d => {
+        html += `<div class="card">
+            ${d.name} - ${d.specialization}
+        </div>`;
+    });
+
+    document.getElementById("content").innerHTML = html;
+}
+
+/* LOAD PATIENTS */
+async function loadPatients() {
+
+    let res = await fetch("/api/patients", {
+        headers: {"Authorization":"Bearer " + token}
+    });
+
+    if (!res.ok) return alert("No access");
+
+    let data = await res.json();
+
+    let html = "<h3>Patients</h3>";
+
+    data.forEach(p => {
+        html += `<div class="card">
+            ${p.name} - ${p.email}
+        </div>`;
+    });
+
+    document.getElementById("content").innerHTML = html;
+}
+
+/* LOGOUT */
+function logout() {
+    token = "";
+    role = "";
+    localStorage.clear();
+    document.getElementById("status").innerText = "Logged out";
+    document.getElementById("content").innerHTML = "";
+}
+
+</script>
+
+</body>
+</html>

@@ -54,6 +54,13 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/appointments/**").hasAnyRole("ADMIN", "DOCTOR", "PATIENT")
 
                         .anyRequest().authenticated()
+
+                        .requestMatchers(
+                                "/doc.html",
+                                "/api/**",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**"
+                        ).permitAll()
                 )
 
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
