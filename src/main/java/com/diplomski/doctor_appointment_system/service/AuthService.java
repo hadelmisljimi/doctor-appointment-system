@@ -21,9 +21,6 @@ public class AuthService {
         this.jwtUtil = jwtUtil;
     }
 
-    // =========================
-    // CORE REGISTER
-    // =========================
     private String register(AuthRequest req, Role role) {
 
         if (repo.findByUsername(req.getUsername()).isPresent()) {
@@ -48,23 +45,6 @@ public class AuthService {
         return register(req, Role.DOCTOR);
     }
 
-    // ONLY ONE ADMIN ALLOWED
-    public String registerAdmin(AuthRequest request) {
-
-        boolean adminExists = repo.findAll()
-                .stream()
-                .anyMatch(u -> u.getRole() == Role.ADMIN);
-
-        if (adminExists) {
-            throw new RuntimeException("Admin already exists. Only one admin allowed.");
-        }
-
-        return register(request, Role.ADMIN);
-    }
-
-    // =========================
-    // LOGIN
-    // =========================
     public AuthResponse login(AuthRequest req) {
 
         User u = repo.findByUsername(req.getUsername())

@@ -3,6 +3,8 @@ package com.diplomski.doctor_appointment_system.repository;
 import com.diplomski.doctor_appointment_system.model.Appointment;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -11,13 +13,21 @@ public interface AppointmentRepository extends MongoRepository<Appointment, Stri
     // =========================
     // CHECK SLOT (FAST EXISTS QUERY)
     // =========================
-    boolean existsByDoctorIdAndDateAndTime(String doctorId, String date, String time);
+    boolean existsByDoctorIdAndDateAndTime(
+            String doctorId,
+            LocalDate date,
+            LocalTime time
+    );
 
-    Optional<Appointment> findByDoctorIdAndDateAndTime(String doctorId, String date, String time);
+    Optional<Appointment> findByDoctorIdAndDateAndTime(
+            String doctorId,
+            LocalDate date,
+            LocalTime time
+    );
 
     List<Appointment> findByDoctorId(String doctorId);
 
     List<Appointment> findByPatientId(String patientId);
 
-    List<Appointment> findByDate(String date);
+    List<Appointment> findByDate(LocalDate date);
 }

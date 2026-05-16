@@ -1,32 +1,22 @@
 package com.diplomski.doctor_appointment_system.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 
 public class AppointmentRequestDTO {
 
-    @NotBlank(message = "Doctor ID is required")
+    @NotBlank
     private String doctorId;
+    private String doctorName;
 
-    @NotBlank(message = "Patient ID is required")
+    @NotBlank
     private String patientId;
+    private String patientName;
 
-    @NotBlank(message = "Date is required")
-    @Size(min = 10, max = 10, message = "Date must be in format YYYY-MM-DD")
-    private String date;
+    @NotBlank
+    private String date; // ISO format: yyyy-MM-dd
 
-    @NotBlank(message = "Time is required")
-    @Size(min = 5, max = 5, message = "Time must be in format HH:mm")
-    private String time;
-
-    public AppointmentRequestDTO() {}
-
-    public AppointmentRequestDTO(String doctorId, String patientId, String date, String time) {
-        this.doctorId = doctorId;
-        this.patientId = patientId;
-        this.date = date;
-        this.time = time;
-    }
+    @NotBlank
+    private String time; // HH:mm
 
     public String getDoctorId() { return doctorId; }
     public void setDoctorId(String doctorId) { this.doctorId = doctorId; }

@@ -1,10 +1,12 @@
 package com.diplomski.doctor_appointment_system.service;
 
+import com.diplomski.doctor_appointment_system.dto.DoctorRequest;
 import com.diplomski.doctor_appointment_system.exception.DoctorNotFoundException;
 import com.diplomski.doctor_appointment_system.model.Doctor;
 import com.diplomski.doctor_appointment_system.repository.DoctorRepository;
+import jakarta.validation.Valid;
 import org.springframework.stereotype.Service;
-
+import java.util.UUID;
 import java.util.List;
 
 @Service
@@ -16,8 +18,20 @@ public class DoctorService {
         this.repo = repo;
     }
 
-    public Doctor createDoctor(Doctor d) {
-        return repo.save(d);
+    public Doctor createDoctor(@Valid DoctorRequest request) {
+
+        Doctor doctor = new Doctor();
+
+        doctor.setId(UUID.randomUUID().toString());
+        doctor.setName(request.getName());
+        doctor.setSpecialization(request.getSpecialization());
+        doctor.setEmail(request.getEmail());
+        doctor.setPhone(request.getPhone());
+        doctor.setAddress(request.getAddress());
+        doctor.setClinicName(request.getClinicName());
+        doctor.setDescription(request.getDescription());
+
+        return repo.save(doctor);
     }
 
     public List<Doctor> getAllDoctors() {
@@ -34,19 +48,21 @@ public class DoctorService {
         repo.delete(getDoctorById(id));
     }
 
-    public Doctor updateDoctor(String id, Doctor d) {
+
+    public Doctor updateDoctor(String id, DoctorRequest request) {
 
         Doctor existing = getDoctorById(id);
 
-        existing.setName(d.getName());
-        existing.setSpecialization(d.getSpecialization());
-        existing.setEmail(d.getEmail());
-        existing.setPhone(d.getPhone());
-        existing.setAddress(d.getAddress());
-        existing.setClinicName(d.getClinicName());
-        existing.setDescription(d.getDescription());
+        existing.setName(request.getName());
+        existing.setSpecialization(request.getSpecialization());
+        existing.setEmail(request.getEmail());
+        existing.setPhone(request.getPhone());
+        existing.setAddress(request.getAddress());
+        existing.setClinicName(request.getClinicName());
+        existing.setDescription(request.getDescription());
 
         return repo.save(existing);
+
     }
 
     public List<Doctor> searchDoctors(String keyword) {

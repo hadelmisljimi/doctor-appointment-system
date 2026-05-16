@@ -1,9 +1,7 @@
 package com.diplomski.doctor_appointment_system.controller;
 
-import com.diplomski.doctor_appointment_system.dto.AppointmentRequestDTO;
-import com.diplomski.doctor_appointment_system.dto.AppointmentResponseDTO;
+import com.diplomski.doctor_appointment_system.dto.*;
 import com.diplomski.doctor_appointment_system.service.AppointmentService;
-import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,61 +17,27 @@ public class AppointmentController {
         this.service = service;
     }
 
-    // =========================
-    // GET ALL
-    // =========================
-    @GetMapping
-    public ResponseEntity<List<AppointmentResponseDTO>> getAll() {
-        return ResponseEntity.ok(service.getAllAppointments());
-    }
-
-    // =========================
-    // BOOK
-    // =========================
     @PostMapping
-    public ResponseEntity<AppointmentResponseDTO> book(
-            @Valid @RequestBody AppointmentRequestDTO dto) {
-
+    public ResponseEntity<?> book(@RequestBody AppointmentRequestDTO dto) {
         return ResponseEntity.ok(service.bookAppointment(dto));
     }
 
-    // =========================
-    // CANCEL
-    // =========================
+    @GetMapping("/search")
+    public ResponseEntity<List<?>> search(
+            @RequestParam(required = false) String doctor,
+            @RequestParam(required = false) String patient,
+            @RequestParam(required = false) String date
+    ) {
+        return ResponseEntity.ok(service.search(doctor, patient, date));
+    }
+
     @PutMapping("/{id}/cancel")
-    public ResponseEntity<AppointmentResponseDTO> cancel(@PathVariable String id) {
+    public ResponseEntity<?> cancel(@PathVariable String id) {
         return ResponseEntity.ok(service.cancelAppointment(id));
     }
 
-    // =========================
-    // COMPLETE
-    // =========================
     @PutMapping("/{id}/complete")
-    public ResponseEntity<AppointmentResponseDTO> complete(@PathVariable String id) {
+    public ResponseEntity<?> complete(@PathVariable String id) {
         return ResponseEntity.ok(service.completeAppointment(id));
-    }
-
-    // =========================
-    // BY DOCTOR
-    // =========================
-    @GetMapping("/doctor/{id}")
-    public ResponseEntity<List<AppointmentResponseDTO>> byDoctor(@PathVariable String id) {
-        return ResponseEntity.ok(service.getByDoctor(id));
-    }
-
-    // =========================
-    // BY PATIENT
-    // =========================
-    @GetMapping("/patient/{id}")
-    public ResponseEntity<List<AppointmentResponseDTO>> byPatient(@PathVariable String id) {
-        return ResponseEntity.ok(service.getByPatient(id));
-    }
-
-    // =========================
-    // BY DATE
-    // =========================
-    @GetMapping("/date/{date}")
-    public ResponseEntity<List<AppointmentResponseDTO>> byDate(@PathVariable String date) {
-        return ResponseEntity.ok(service.getByDate(date));
     }
 }

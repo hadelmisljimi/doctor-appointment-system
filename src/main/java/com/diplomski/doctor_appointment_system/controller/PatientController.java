@@ -1,6 +1,7 @@
 package com.diplomski.doctor_appointment_system.controller;
 
 import com.diplomski.doctor_appointment_system.model.Patient;
+import com.diplomski.doctor_appointment_system.dto.PatientRequest;
 import com.diplomski.doctor_appointment_system.service.PatientService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -19,29 +20,21 @@ public class PatientController {
         this.service = service;
     }
 
-    // =========================
-    // GET ALL PATIENTS
-    // =========================
     @GetMapping
     public ResponseEntity<List<Patient>> getAll() {
         return ResponseEntity.ok(service.getAll());
     }
 
-    // =========================
-    // CREATE PATIENT
-    // =========================
+    // ✔ DTO umjesto entity
     @PostMapping
     public ResponseEntity<Patient> create(
-            @Valid @RequestBody Patient patient
+            @Valid @RequestBody PatientRequest request
     ) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(service.create(patient));
+                .body(service.create(request));
     }
 
-    // =========================
-    // SEARCH PATIENTS
-    // =========================
     @GetMapping("/search")
     public ResponseEntity<List<Patient>> search(
             @RequestParam String q

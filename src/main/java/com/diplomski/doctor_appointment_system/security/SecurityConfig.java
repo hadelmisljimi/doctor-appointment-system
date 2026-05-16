@@ -14,9 +14,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
+    private final CustomAccessDeniedHandler accessDeniedHandler;
 
-    public SecurityConfig(JwtFilter jwtFilter) {
+    public SecurityConfig(JwtFilter jwtFilter,
+                          CustomAccessDeniedHandler accessDeniedHandler) {
         this.jwtFilter = jwtFilter;
+        this.accessDeniedHandler = accessDeniedHandler;
     }
 
     @Bean
@@ -29,15 +32,25 @@ public class SecurityConfig {
                         sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
 
+                // 🔥 IMPORTANT: hvata i 403 i 401 ispravno
+                .exceptionHandling(ex -> ex
+                        .accessDeniedHandler(accessDeniedHandler)
+                )
+
                 .authorizeHttpRequests(auth -> auth
 
-                        // AUTH
-                        .requestMatchers("/api/auth/login").permitAll()
-                        .requestMatchers("/api/auth/register/patient").permitAll()
-                        .requestMatchers("/api/auth/register/doctor").hasRole("ADMIN")
+                        // PUBLIC
+                        .requestMatchers("/api/auth/**").permitAll()
 
                         // SWAGGER
-                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll()
+                        .requestMatchers(
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html"
+                        ).permitAll()
+
+                        // ADMIN ONLY
+                        .requestMatchers("/api/auth/register/doctor").hasRole("ADMIN")
 
                         // DOCTORS
                         .requestMatchers(HttpMethod.GET, "/api/doctors/**").permitAll()
@@ -46,28 +59,18 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/doctors/**").hasRole("ADMIN")
 
                         // PATIENTS
-                        .requestMatchers("/api/patients/**").hasAnyRole("ADMIN", "DOCTOR")
+                        .requestMatchers("/api/patients/**")
+                        .hasAnyRole("ADMIN", "DOCTOR")
 
                         // APPOINTMENTS
-                        .requestMatchers(HttpMethod.POST, "/api/appointments/**").hasRole("PATIENT")
-                        .requestMatchers(HttpMethod.PUT, "/api/appointments/**").hasAnyRole("ADMIN", "DOCTOR")
-                        .requestMatchers(HttpMethod.GET, "/api/appointments/**").hasAnyRole("ADMIN", "DOCTOR", "PATIENT")
+                        .requestMatchers(HttpMethod.POST, "/api/appointments/**")
+                        .hasAnyRole("PATIENT", "ADMIN")
 
+                        .requestMatchers(HttpMethod.PUT, "/api/appointments/**")
+                        .hasAnyRole("DOCTOR", "ADMIN")
 
-
-                        .requestMatchers(
-                                "/doc.html",
-                                "/api/**",
-                                "/swagger-ui/**",
-                                "/v3/api-docs/**"
-                        ).permitAll()
-
-                        .requestMatchers(
-                                "/swagger-ui/**",
-                                "/v3/api-docs/**",
-                                "/swagger-ui.html",
-                                "/swagger-custom.js"
-                        ).permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/appointments/**")
+                        .hasAnyRole("PATIENT", "DOCTOR", "ADMIN")
 
                         .anyRequest().authenticated()
                 )

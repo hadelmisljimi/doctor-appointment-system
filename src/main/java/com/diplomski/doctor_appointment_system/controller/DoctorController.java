@@ -1,10 +1,12 @@
 package com.diplomski.doctor_appointment_system.controller;
 
+import com.diplomski.doctor_appointment_system.dto.DoctorRequest;
 import com.diplomski.doctor_appointment_system.model.Doctor;
 import com.diplomski.doctor_appointment_system.service.DoctorService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,16 +22,17 @@ public class DoctorController {
     }
 
     // =========================
-    // CREATE DOCTOR
+    // CREATE DOCTOR (ADMIN ONLY)
     // =========================
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    public ResponseEntity<Doctor> create(@Valid @RequestBody Doctor doctor) {
+    public ResponseEntity<Doctor> create(@Valid @RequestBody DoctorRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(service.createDoctor(doctor));
+                .body(service.createDoctor(request));
     }
 
     // =========================
-    // GET ALL DOCTORS
+    // GET ALL DOCTORS (PUBLIC)
     // =========================
     @GetMapping
     public ResponseEntity<List<Doctor>> getAll() {
@@ -37,7 +40,7 @@ public class DoctorController {
     }
 
     // =========================
-    // GET BY ID
+    // GET BY ID (PUBLIC)
     // =========================
     @GetMapping("/{id}")
     public ResponseEntity<Doctor> getById(@PathVariable String id) {
@@ -45,17 +48,19 @@ public class DoctorController {
     }
 
     // =========================
-    // UPDATE DOCTOR
+    // UPDATE DOCTOR (ADMIN ONLY)
     // =========================
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<Doctor> update(@PathVariable String id,
-                                         @Valid @RequestBody Doctor doctor) {
-        return ResponseEntity.ok(service.updateDoctor(id, doctor));
+                                         @Valid @RequestBody DoctorRequest request) {
+        return ResponseEntity.ok(service.updateDoctor(id, request));
     }
 
     // =========================
-    // DELETE DOCTOR
+    // DELETE DOCTOR (ADMIN ONLY)
     // =========================
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable String id) {
         service.deleteDoctor(id);
@@ -63,7 +68,7 @@ public class DoctorController {
     }
 
     // =========================
-    // FILTER BY SPECIALIZATION
+    // FILTER BY SPECIALIZATION (PUBLIC)
     // =========================
     @GetMapping("/specialization/{spec}")
     public ResponseEntity<List<Doctor>> bySpecialization(@PathVariable String spec) {
@@ -71,7 +76,7 @@ public class DoctorController {
     }
 
     // =========================
-    // SEARCH DOCTORS
+    // SEARCH DOCTORS (PUBLIC)
     // =========================
     @GetMapping("/search")
     public ResponseEntity<List<Doctor>> search(@RequestParam String q) {

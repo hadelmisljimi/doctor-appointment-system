@@ -1,6 +1,5 @@
 package com.diplomski.doctor_appointment_system.security;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -28,18 +27,18 @@ public class JwtFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            FilterChain filterChain
-    ) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain)
+            throws ServletException, IOException {
 
         String path = request.getRequestURI();
 
-        // PUBLIC ENDPOINTS
+        // PUBLIC
         if (path.startsWith("/api/auth/")
                 || path.startsWith("/v3/api-docs")
                 || path.startsWith("/swagger-ui")) {
+
             filterChain.doFilter(request, response);
             return;
         }
@@ -57,47 +56,47 @@ public class JwtFilter extends OncePerRequestFilter {
             Claims claims = jwtUtil.extractAllClaims(token);
 
             String username = claims.getSubject();
-            String role = claims.get("role", String.class);
 
-            var auth = new UsernamePasswordAuthenticationToken(
-                    username,
-                    null,
-                    List.of(new SimpleGrantedAuthority("ROLE_" + role))
+            // 🔥 FIX: role normalize (najčešći bug)
+            String role = claims.get("ROLE").toString().toUpperCase();
+
+            SecurityContextHolder.getContext().setAuthentication(
+                    new UsernamePasswordAuthenticationToken(
+                            username,
+                            null,
+                            List.of(new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()))
+
+                    )
+
             );
 
-            SecurityContextHolder.getContext().setAuthentication(auth);
-
         } catch (ExpiredJwtException e) {
-            sendError(response, 401, "JWT token expired", path);
+            sendError(response, 401, "JWT expired", path);
             return;
 
         } catch (JwtException e) {
-            sendError(response, 401, "Invalid JWT token", path);
+            sendError(response, 401, "Invalid JWT", path);
             return;
         }
 
         filterChain.doFilter(request, response);
     }
 
-    private void sendError(
-            HttpServletResponse response,
-            int status,
-            String message,
-            String path
-    ) throws IOException {
+    private void sendError(HttpServletResponse response,
+                           int status,
+                           String message,
+                           String path) throws IOException {
 
         response.setContentType("application/json");
         response.setStatus(status);
 
-        ObjectMapper mapper = new ObjectMapper();
-
-        mapper.writeValue(response.getOutputStream(),
-                Map.of(
-                        "status", status,
-                        "error", "Unauthorized",
-                        "message", message,
-                        "path", path
-                )
-        );
+        new com.fasterxml.jackson.databind.ObjectMapper()
+                .writeValue(response.getOutputStream(),
+                        Map.of(
+                                "status", status,
+                                "error", "Unauthorized",
+                                "message", message,
+                                "path", path
+                        ));
     }
 }
