@@ -3,6 +3,7 @@ package com.diplomski.doctor_appointment_system.dto;
 public class AuthResponse {
 
     private String token;
+
     private String role;
 
     public AuthResponse() {}
@@ -18,3 +19,4 @@ public class AuthResponse {
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
 }
+

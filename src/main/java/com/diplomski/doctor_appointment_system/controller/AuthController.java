@@ -8,7 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+@SecurityRequirement(name = "BearerAuth")
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -47,4 +48,5 @@ public class AuthController {
     ) {
         return ResponseEntity.ok(authService.login(request));
     }
+
 }
