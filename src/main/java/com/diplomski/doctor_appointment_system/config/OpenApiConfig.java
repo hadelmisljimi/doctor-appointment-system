@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class OpenApiConfig {
 
-    private static final String SECURITY_SCHEME_NAME = "bearerAuth";
+    private static final String SECURITY_SCHEME_NAME = "LOGIN(Admin,Doctor or Patient)";
 
     @Bean
     public OpenAPI openAPI() {
@@ -20,7 +20,7 @@ public class OpenApiConfig {
         return new OpenAPI()
 
                 // =========================
-                // API METADATA (DIPLOMSKI / ENTERPRISE STYLE)
+                // API METADATA
                 // =========================
                 .info(new Info()
                         .title("Doctor Appointment System REST API")
@@ -29,10 +29,7 @@ public class OpenApiConfig {
                                 "Backend system for managing doctors, patients and appointments. " +
                                         "JWT authentication is required for protected endpoints."
                         )
-                        .contact(new Contact()
-                                .name("System Support")
-                                .email("support@doctorappointmentsystem.com")
-                        )
+
                 )
 
                 // =========================
@@ -51,8 +48,7 @@ public class OpenApiConfig {
                                         .scheme("bearer")
                                         .bearerFormat("JWT")
                                         .description(
-                                                "Enter JWT token without 'Bearer ' prefix. " +
-                                                        "Example: eyJhbGciOiJIUzI1NiIsInR5cCI6..."
+                                                "Take your JWT token from the auth/login option and insert it into the field below. "
                                         )
                         )
                 );
