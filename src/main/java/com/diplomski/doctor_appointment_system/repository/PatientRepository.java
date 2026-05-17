@@ -14,13 +14,13 @@ public interface PatientRepository extends MongoRepository<Patient, String> {
     boolean existsByEmail(String email);
 
     @Query("""
-        {
-          $or: [
-            { 'name': { $regex: ?0, $options: 'i' } },
-            { 'email': { $regex: ?0, $options: 'i' } },
-            { 'phone': { $regex: ?0, $options: 'i' } }
-          ]
-        }
-    """)
+                {
+                  $or: [
+                    { 'name': { $regex: '^?0$', $options: 'i' } } ,                                               
+                    { 'email': { $regex: ?0, $options: 'i' } },
+                    { 'phone': { $regex: ?0, $options: 'i' } }
+                  ]
+                }
+            """)
     List<Patient> searchPatients(String keyword);
 }

@@ -42,15 +42,17 @@ public class PatientController {
         return ResponseEntity.ok(service.search(q, id));
     }
 
-    // ✅ FIXED (uklonjen /api/patients iz mappinga)
+    // =========================
+    // FIXED PUT
+    // =========================
     @PutMapping("/{id}")
     public ResponseEntity<?> updatePatient(@PathVariable String id,
-                                           @RequestBody PatientRequest request) {
+                                           @RequestBody Patient request) {
 
-        return ResponseEntity.ok("Patient updated successfully");
+        Patient updated = service.update(id, request);
+
+        return ResponseEntity.ok(updated);
     }
-
-    // ✅ FIXED (uklonjen /api/patients iz mappinga)
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deletePatient(@PathVariable String id) {
