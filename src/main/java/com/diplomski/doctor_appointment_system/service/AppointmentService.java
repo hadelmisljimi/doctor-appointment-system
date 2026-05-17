@@ -5,6 +5,7 @@ import com.diplomski.doctor_appointment_system.model.*;
 import com.diplomski.doctor_appointment_system.repository.*;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -21,6 +22,48 @@ public class AppointmentService {
         this.repository = repository;
         this.doctorRepository = doctorRepository;
         this.patientRepository = patientRepository;
+    }
+
+    // ================= WORKING HOURS VALIDATION =================
+    private void validateClinicHours(String time) {
+
+        LocalTime start = LocalTime.of(8, 0);
+        LocalTime end = LocalTime.of(21, 0);
+
+        LocalTime appointmentTime = LocalTime.parse(time);
+
+        if (appointmentTime.isBefore(start) || appointmentTime.isAfter(end)) {
+            throw new RuntimeException(
+                    "The clinic is closed. It opens at 08:00 AM and closes at 22:00 PM."
+            );
+        }
+    }
+
+    // ================= DATE VALIDATION =================
+    private void validateDate(String date) {
+
+        // STRICT FORMAT: DD.MM.YYYY.
+        if (date == null || !date.matches("\\d{2}\\.\\d{2}\\.\\d{4}\\."))
+            throw new RuntimeException(
+                    "Invalid date format. Use DD.MM.YYYY (example: 04.06.2026.). Day and month must be two digits."
+            );
+
+        String[] parts = date.split("\\.");
+
+        int day = Integer.parseInt(parts[0]);
+        int month = Integer.parseInt(parts[1]);
+        int year = Integer.parseInt(parts[2]);
+
+        if (day < 1 || day > 31) {
+            throw new RuntimeException("Day must be between 01 and 31.");
+        }
+        if (month < 1 || month > 12) {
+            throw new RuntimeException("Month must be between 01 and 12.");
+        }
+
+        if (year < 2026) {
+            throw new RuntimeException("Year must be 2026 or later.");
+        }
     }
 
     // ================= MAP =================
@@ -45,17 +88,14 @@ public class AppointmentService {
         return dto;
     }
 
-    // ================= RESOLVE DOCTOR (ID or NAME) =================
+    // ================= RESOLVE DOCTOR =================
     private String resolveDoctor(String input) {
 
         if (input == null || input.isBlank()) return null;
 
-        // 1. TRY BY ID
         return doctorRepository.findById(input)
                 .map(Doctor::getId)
                 .orElseGet(() ->
-
-                        // 2. TRY BY NAME
                         doctorRepository.findAll().stream()
                                 .filter(d -> d.getName().equalsIgnoreCase(input))
                                 .findFirst()
@@ -64,7 +104,7 @@ public class AppointmentService {
                 );
     }
 
-    // ================= RESOLVE PATIENT (ID or NAME) =================
+    // ================= RESOLVE PATIENT =================
     private String resolvePatient(String input) {
 
         if (input == null || input.isBlank()) return null;
@@ -72,7 +112,6 @@ public class AppointmentService {
         return patientRepository.findById(input)
                 .map(Patient::getId)
                 .orElseGet(() ->
-
                         patientRepository.findAll().stream()
                                 .filter(p -> p.getName().equalsIgnoreCase(input))
                                 .findFirst()
@@ -83,7 +122,6 @@ public class AppointmentService {
 
     // ================= GET ALL =================
     public List<AppointmentResponseDTO> getAllAppointments() {
-
         return repository.findAll()
                 .stream()
                 .map(this::map)
@@ -104,6 +142,10 @@ public class AppointmentService {
             throw new RuntimeException("Patient not found: " + dto.getPatientId());
         }
 
+        // 🔥 VALIDATIONS ADDED HERE
+        validateClinicHours(dto.getTime());
+        validateDate(dto.getDate());
+
         Appointment a = new Appointment();
 
         a.setId(UUID.randomUUID().toString());
@@ -116,7 +158,7 @@ public class AppointmentService {
         return map(repository.save(a));
     }
 
-    // ================= SEARCH (ID or NAME) =================
+    // ================= SEARCH =================
     public List<AppointmentResponseDTO> search(String doctor, String patient, String date, String id) {
 
         if (id != null && !id.isBlank()) {

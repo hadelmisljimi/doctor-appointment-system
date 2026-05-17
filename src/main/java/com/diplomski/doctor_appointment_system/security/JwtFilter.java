@@ -51,13 +51,12 @@ public class JwtFilter extends OncePerRequestFilter {
 
         try {
             String token = header.substring(7);
+
             Claims claims = jwtUtil.extractAllClaims(token);
-
             String username = claims.getSubject();
-
             String role = (String) claims.get("role");
-            if (role == null) role = "PATIENT";
 
+            if (role == null) role = "PATIENT";
             role = role.toUpperCase();
 
             var auth = new UsernamePasswordAuthenticationToken(
@@ -69,19 +68,13 @@ public class JwtFilter extends OncePerRequestFilter {
             SecurityContextHolder.getContext().setAuthentication(auth);
 
         } catch (ExpiredJwtException e) {
-
-            sendError(response, 401,
-                    "Token expired",
-                    "Your session expired. Please login again."
-            );
+            sendError(response, 401, "Token expired",
+                    "Your session expired. Please login again.");
             return;
 
         } catch (JwtException e) {
-
-            sendError(response, 401,
-                    "Invalid token",
-                    "JWT is invalid or corrupted. Please login again."
-            );
+            sendError(response, 401, "Invalid token",
+                    "JWT is invalid or corrupted. Please login again.");
             return;
         }
 
