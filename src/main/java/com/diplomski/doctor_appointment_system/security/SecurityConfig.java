@@ -43,7 +43,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
 
                         // =========================
-                        // AUTH (NE DIRAM)
+                        // AUTH
                         // =========================
                         .requestMatchers("/api/auth/register/patient").permitAll()
                         .requestMatchers("/api/auth/login").permitAll()
@@ -60,7 +60,8 @@ public class SecurityConfig {
                         // =========================
                         .requestMatchers(HttpMethod.GET, "/api/appointments/**").permitAll()
                         .requestMatchers("/api/appointments/search").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/appointments").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/appointments")
+                        .hasAnyRole("ADMIN", "DOCTOR", "PATIENT")
                         .requestMatchers(HttpMethod.PUT, "/api/appointments/**")
                         .hasAnyRole("ADMIN", "DOCTOR")
 

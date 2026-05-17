@@ -44,4 +44,10 @@ public class AppointmentController {
     public ResponseEntity<?> complete(@PathVariable String id) {
         return ResponseEntity.ok(service.completeAppointment(id));
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> delete(@PathVariable String id) {
+        service.deleteAppointment(id);
+        return ResponseEntity.ok("Appointment deleted successfully");
+    }
 }
