@@ -21,9 +21,6 @@ public class DoctorController {
         this.service = service;
     }
 
-    // =========================
-    // CREATE DOCTOR (ADMIN ONLY)
-    // =========================
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<Doctor> create(@Valid @RequestBody DoctorRequest request) {
@@ -31,25 +28,16 @@ public class DoctorController {
                 .body(service.createDoctor(request));
     }
 
-    // =========================
-    // GET ALL DOCTORS (PUBLIC)
-    // =========================
     @GetMapping
     public ResponseEntity<List<Doctor>> getAll() {
         return ResponseEntity.ok(service.getAllDoctors());
     }
 
-    // =========================
-    // GET BY ID (PUBLIC)
-    // =========================
     @GetMapping("/{id}")
     public ResponseEntity<Doctor> getById(@PathVariable String id) {
         return ResponseEntity.ok(service.getDoctorById(id));
     }
 
-    // =========================
-    // UPDATE DOCTOR (ADMIN ONLY)
-    // =========================
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<Doctor> update(@PathVariable String id,
@@ -57,29 +45,23 @@ public class DoctorController {
         return ResponseEntity.ok(service.updateDoctor(id, request));
     }
 
-    // =========================
-    // DELETE DOCTOR (ADMIN ONLY)
-    // =========================
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable String id) {
+    public ResponseEntity<String> delete(@PathVariable String id) {
         service.deleteDoctor(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok("Doctor successfully deleted.");
     }
 
-    // =========================
-    // FILTER BY SPECIALIZATION (PUBLIC)
-    // =========================
     @GetMapping("/specialization/{spec}")
     public ResponseEntity<List<Doctor>> bySpecialization(@PathVariable String spec) {
         return ResponseEntity.ok(service.getBySpecialization(spec));
     }
 
-    // =========================
-    // SEARCH DOCTORS (PUBLIC)
-    // =========================
     @GetMapping("/search")
-    public ResponseEntity<List<Doctor>> search(@RequestParam String q) {
-        return ResponseEntity.ok(service.searchDoctors(q));
+    public ResponseEntity<List<Doctor>> search(
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false) String id
+    ) {
+        return ResponseEntity.ok(service.search(q, id));
     }
 }

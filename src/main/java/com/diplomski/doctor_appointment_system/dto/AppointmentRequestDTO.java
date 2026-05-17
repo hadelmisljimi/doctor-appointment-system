@@ -1,22 +1,31 @@
 package com.diplomski.doctor_appointment_system.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 
 public class AppointmentRequestDTO {
 
-    @NotBlank
+    @NotBlank(message = "doctorId is required")
     private String doctorId;
-    private String doctorName;
 
-    @NotBlank
+    @NotBlank(message = "patientId is required")
     private String patientId;
-    private String patientName;
 
-    @NotBlank
-    private String date; // ISO format: yyyy-MM-dd
+    @NotBlank(message = "Date is required")
+    @Pattern(
+            regexp = "^\\d{2}\\.\\d{2}\\.\\d{4}\\.$",
+            message = "Invalid date format. Required: dd.MM.yyyy. Example: 15.05.2026."
+    )
+    private String date;
 
-    @NotBlank
-    private String time; // HH:mm
+    @NotBlank(message = "Time is required")
+    @Pattern(
+            regexp = "^([01]\\d|2[0-3]):[0-5]\\d$",
+            message = "Invalid time format. Required: HH:mm. Example: 17:00"
+    )
+    private String time;
+
+    // ---------- GETTERS / SETTERS ----------
 
     public String getDoctorId() { return doctorId; }
     public void setDoctorId(String doctorId) { this.doctorId = doctorId; }

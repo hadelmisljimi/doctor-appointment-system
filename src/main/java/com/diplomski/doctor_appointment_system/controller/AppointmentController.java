@@ -1,11 +1,9 @@
 package com.diplomski.doctor_appointment_system.controller;
 
-import com.diplomski.doctor_appointment_system.dto.*;
+import com.diplomski.doctor_appointment_system.dto.AppointmentRequestDTO;
 import com.diplomski.doctor_appointment_system.service.AppointmentService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/appointments")
@@ -22,13 +20,19 @@ public class AppointmentController {
         return ResponseEntity.ok(service.bookAppointment(dto));
     }
 
+    @GetMapping
+    public ResponseEntity<?> getAll() {
+        return ResponseEntity.ok(service.getAllAppointments());
+    }
+
     @GetMapping("/search")
-    public ResponseEntity<List<?>> search(
+    public ResponseEntity<?> search(
             @RequestParam(required = false) String doctor,
             @RequestParam(required = false) String patient,
-            @RequestParam(required = false) String date
+            @RequestParam(required = false) String date,
+            @RequestParam(required = false) String id
     ) {
-        return ResponseEntity.ok(service.search(doctor, patient, date));
+        return ResponseEntity.ok(service.search(doctor, patient, date, id));
     }
 
     @PutMapping("/{id}/cancel")

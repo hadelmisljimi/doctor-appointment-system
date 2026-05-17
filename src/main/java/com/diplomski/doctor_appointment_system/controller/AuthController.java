@@ -29,7 +29,7 @@ public class AuthController {
     }
 
     // ADMIN ONLY - REGISTER DOCTOR
-    @PreAuthorize("hasRole('ADMIN')")
+
     @PostMapping("/register/doctor")
     public ResponseEntity<String> registerDoctor(@Valid @RequestBody AuthRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)

@@ -15,11 +15,14 @@ public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
     private final CustomAccessDeniedHandler accessDeniedHandler;
+    private final CustomAuthenticationEntryPoint entryPoint;
 
     public SecurityConfig(JwtFilter jwtFilter,
-                          CustomAccessDeniedHandler accessDeniedHandler) {
+                          CustomAccessDeniedHandler accessDeniedHandler,
+                          CustomAuthenticationEntryPoint entryPoint) {
         this.jwtFilter = jwtFilter;
         this.accessDeniedHandler = accessDeniedHandler;
+        this.entryPoint = entryPoint;
     }
 
     @Bean
@@ -32,46 +35,60 @@ public class SecurityConfig {
                         sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
 
-                // 🔥 IMPORTANT: hvata i 403 i 401 ispravno
                 .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(entryPoint)
                         .accessDeniedHandler(accessDeniedHandler)
                 )
 
                 .authorizeHttpRequests(auth -> auth
 
-                        // PUBLIC
-                        .requestMatchers("/api/auth/**").permitAll()
+                        // =========================
+                        // AUTH (NE DIRAM)
+                        // =========================
+                        .requestMatchers("/api/auth/register/patient").permitAll()
+                        .requestMatchers("/api/auth/login").permitAll()
 
-                        // SWAGGER
-                        .requestMatchers(
-                                "/v3/api-docs/**",
+                        .requestMatchers("/v3/api-docs/**",
                                 "/swagger-ui/**",
-                                "/swagger-ui.html"
-                        ).permitAll()
+                                "/swagger-ui.html").permitAll()
 
-                        // ADMIN ONLY
-                        .requestMatchers("/api/auth/register/doctor").hasRole("ADMIN")
+                        .requestMatchers("/api/auth/register/doctor")
+                        .hasRole("ADMIN")
 
+                        // =========================
+                        // APPOINTMENTS
+                        // =========================
+                        .requestMatchers(HttpMethod.GET, "/api/appointments/**").permitAll()
+                        .requestMatchers("/api/appointments/search").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/appointments").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/api/appointments/**")
+                        .hasAnyRole("ADMIN", "DOCTOR")
+
+                        // =========================
                         // DOCTORS
+                        // =========================
                         .requestMatchers(HttpMethod.GET, "/api/doctors/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/doctors/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/doctors").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/doctors/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/doctors/**").hasRole("ADMIN")
 
+                        // =========================
                         // PATIENTS
-                        .requestMatchers("/api/patients/**")
+                        // =========================
+                        .requestMatchers(HttpMethod.GET, "/api/patients/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/patients")
+                        .hasAnyRole("ADMIN", "DOCTOR", "PATIENT")
+                        .requestMatchers(HttpMethod.PUT, "/api/patients/**")
+                        .hasAnyRole("ADMIN", "DOCTOR")
+                        .requestMatchers(HttpMethod.DELETE, "/api/patients/**")
                         .hasAnyRole("ADMIN", "DOCTOR")
 
-                        // APPOINTMENTS
-                        .requestMatchers(HttpMethod.POST, "/api/appointments/**")
-                        .hasAnyRole("PATIENT", "ADMIN")
+                        // =========================
+                        // SEARCH
+                        // =========================
+                        .requestMatchers("/api/search").permitAll()
 
-                        .requestMatchers(HttpMethod.PUT, "/api/appointments/**")
-                        .hasAnyRole("DOCTOR", "ADMIN")
-
-                        .requestMatchers(HttpMethod.GET, "/api/appointments/**")
-                        .hasAnyRole("PATIENT", "DOCTOR", "ADMIN")
-
+                        // fallback
                         .anyRequest().authenticated()
                 )
 

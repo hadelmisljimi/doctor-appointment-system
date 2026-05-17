@@ -15,7 +15,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 @Component
 public class JwtFilter extends OncePerRequestFilter {
@@ -34,8 +33,8 @@ public class JwtFilter extends OncePerRequestFilter {
 
         String path = request.getRequestURI();
 
-        // PUBLIC
-        if (path.startsWith("/api/auth/")
+        if (path.equals("/api/auth/login")
+                || path.equals("/api/auth/register/patient")
                 || path.startsWith("/v3/api-docs")
                 || path.startsWith("/swagger-ui")) {
 
@@ -52,30 +51,37 @@ public class JwtFilter extends OncePerRequestFilter {
 
         try {
             String token = header.substring(7);
-
             Claims claims = jwtUtil.extractAllClaims(token);
 
             String username = claims.getSubject();
 
-            // 🔥 FIX: role normalize (najčešći bug)
-            String role = claims.get("ROLE").toString().toUpperCase();
+            String role = (String) claims.get("role");
+            if (role == null) role = "PATIENT";
 
-            SecurityContextHolder.getContext().setAuthentication(
-                    new UsernamePasswordAuthenticationToken(
-                            username,
-                            null,
-                            List.of(new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()))
+            role = role.toUpperCase();
 
-                    )
-
+            var auth = new UsernamePasswordAuthenticationToken(
+                    username,
+                    null,
+                    List.of(new SimpleGrantedAuthority("ROLE_" + role))
             );
 
+            SecurityContextHolder.getContext().setAuthentication(auth);
+
         } catch (ExpiredJwtException e) {
-            sendError(response, 401, "JWT expired", path);
+
+            sendError(response, 401,
+                    "Token expired",
+                    "Your session expired. Please login again."
+            );
             return;
 
         } catch (JwtException e) {
-            sendError(response, 401, "Invalid JWT", path);
+
+            sendError(response, 401,
+                    "Invalid token",
+                    "JWT is invalid or corrupted. Please login again."
+            );
             return;
         }
 
@@ -84,19 +90,18 @@ public class JwtFilter extends OncePerRequestFilter {
 
     private void sendError(HttpServletResponse response,
                            int status,
-                           String message,
-                           String path) throws IOException {
+                           String error,
+                           String message) throws IOException {
 
         response.setContentType("application/json");
         response.setStatus(status);
 
         new com.fasterxml.jackson.databind.ObjectMapper()
                 .writeValue(response.getOutputStream(),
-                        Map.of(
+                        java.util.Map.of(
                                 "status", status,
-                                "error", "Unauthorized",
-                                "message", message,
-                                "path", path
+                                "error", error,
+                                "message", message
                         ));
     }
 }

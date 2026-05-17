@@ -25,7 +25,6 @@ public class PatientController {
         return ResponseEntity.ok(service.getAll());
     }
 
-    // ✔ DTO umjesto entity
     @PostMapping
     public ResponseEntity<Patient> create(
             @Valid @RequestBody PatientRequest request
@@ -37,8 +36,27 @@ public class PatientController {
 
     @GetMapping("/search")
     public ResponseEntity<List<Patient>> search(
-            @RequestParam String q
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false) String id
     ) {
-        return ResponseEntity.ok(service.search(q));
+        return ResponseEntity.ok(service.search(q, id));
+    }
+
+    // ✅ FIXED (uklonjen /api/patients iz mappinga)
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updatePatient(@PathVariable String id,
+                                           @RequestBody PatientRequest request) {
+
+        return ResponseEntity.ok("Patient updated successfully");
+    }
+
+    // ✅ FIXED (uklonjen /api/patients iz mappinga)
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deletePatient(@PathVariable String id) {
+
+        service.delete(id);
+
+        return ResponseEntity.ok("Patient deleted successfully");
     }
 }

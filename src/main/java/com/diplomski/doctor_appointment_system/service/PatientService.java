@@ -21,12 +21,11 @@ public class PatientService {
         return repo.findAll();
     }
 
-    // ✔ AUTO ID + DTO
     public Patient create(PatientRequest request) {
 
         Patient patient = new Patient();
 
-        patient.setId(UUID.randomUUID().toString()); // 🔥 AUTO ID
+        patient.setId(UUID.randomUUID().toString());
         patient.setName(request.getName());
         patient.setEmail(request.getEmail());
         patient.setPhone(request.getPhone());
@@ -34,12 +33,47 @@ public class PatientService {
         return repo.save(patient);
     }
 
-    public List<Patient> search(String keyword) {
+    // =========================
+    // SEARCH FIXED
+    // =========================
+    public List<Patient> search(String keyword, String id) {
 
-        if (keyword == null || keyword.isBlank()) {
-            return getAll();
+        // ID ima prioritet
+        if (id != null && !id.isBlank()) {
+            return repo.findById(id)
+                    .stream()
+                    .toList();
         }
 
-        return repo.searchPatients(keyword);
+        // ako keyword izgleda kao UUID
+        if (keyword != null && isUUID(keyword)) {
+            return repo.findById(keyword)
+                    .stream()
+                    .toList();
+        }
+
+        if (keyword != null && !keyword.isBlank()) {
+            return repo.searchPatients(keyword);
+        }
+
+        return getAll();
+    }
+
+    private boolean isUUID(String value) {
+        try {
+            UUID.fromString(value);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public void delete(String id) {
+
+        if (!repo.existsById(id)) {
+            throw new RuntimeException("Patient not found: " + id);
+        }
+
+        repo.deleteById(id);
     }
 }

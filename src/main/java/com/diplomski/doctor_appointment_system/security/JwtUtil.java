@@ -15,12 +15,13 @@ public class JwtUtil {
 
     private final Key key = Keys.hmacShaKeyFor(SECRET.getBytes());
 
-    private static final long EXPIRATION_TIME = 1000 * 60 * 60 * 10; // 10h
+    private static final long EXPIRATION_TIME = 1000 * 60 * 60 * 10;
 
     public String generateToken(String username, String role) {
 
         return Jwts.builder()
                 .setSubject(username)
+                //  FIX: koristi "role" (NE ROLE)
                 .claim("role", role)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
