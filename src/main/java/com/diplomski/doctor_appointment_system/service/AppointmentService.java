@@ -4,6 +4,10 @@ import com.diplomski.doctor_appointment_system.dto.*;
 import com.diplomski.doctor_appointment_system.model.*;
 import com.diplomski.doctor_appointment_system.repository.*;
 import org.springframework.stereotype.Service;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.LocalDateTime;
 
 import java.time.LocalTime;
 import java.util.List;
@@ -63,6 +67,73 @@ public class AppointmentService {
 
         if (year < 2026) {
             throw new RuntimeException("Year must be 2026 or later.");
+        }
+    }
+
+    private void validateWeekend(String date) {
+
+        DateTimeFormatter formatter =
+                DateTimeFormatter.ofPattern("dd.MM.yyyy.");
+
+        LocalDate parsedDate =
+                LocalDate.parse(date, formatter);
+
+        DayOfWeek day = parsedDate.getDayOfWeek();
+
+        if (day == DayOfWeek.SATURDAY
+                || day == DayOfWeek.SUNDAY) {
+
+            throw new RuntimeException(
+                    "Appointments cannot be booked on weekends."
+            );
+        }
+    }
+
+    private void validate30MinuteSlot(String time) {
+
+        LocalTime parsed = LocalTime.parse(time);
+
+        int minutes = parsed.getMinute();
+
+        if (minutes != 0 && minutes != 30) {
+            throw new RuntimeException(
+                    "Appointments must be scheduled every 30 minutes."
+            );
+        }
+    }
+    private void validateFutureDate(String date) {
+
+        DateTimeFormatter formatter =
+                DateTimeFormatter.ofPattern("dd.MM.yyyy.");
+
+        LocalDate appointmentDate =
+                LocalDate.parse(date, formatter);
+
+        LocalDate today = LocalDate.now();
+
+        if (appointmentDate.isBefore(today)) {
+
+            throw new RuntimeException(
+                    "Appointments can only be booked for future dates."
+            );
+        }
+    }
+
+    private void validateFutureDateTime(String date, String time) {
+
+        DateTimeFormatter formatter =
+                DateTimeFormatter.ofPattern("dd.MM.yyyy. HH:mm");
+
+        LocalDateTime appointmentDateTime =
+                LocalDateTime.parse(date + " " + time, formatter);
+
+        LocalDateTime now = LocalDateTime.now();
+
+        if (appointmentDateTime.isBefore(now)) {
+
+            throw new RuntimeException(
+                    "Cannot book appointments in the past."
+            );
         }
     }
 
@@ -145,6 +216,21 @@ public class AppointmentService {
         // 🔥 VALIDATIONS ADDED HERE
         validateClinicHours(dto.getTime());
         validateDate(dto.getDate());
+        validateWeekend(dto.getDate());
+        validate30MinuteSlot(dto.getTime());
+        validateFutureDate(dto.getDate());
+        validateFutureDateTime(dto.getDate(), dto.getTime());
+
+        if (repository.existsByDoctorIdAndDateAndTimeAndStatus(
+                doctorId,
+                dto.getDate(),
+                dto.getTime(),
+                AppointmentStatus.BOOKED
+        )) {
+            throw new RuntimeException(
+                    "This appointment slot is already booked."
+            );
+        }
 
         Appointment a = new Appointment();
 
