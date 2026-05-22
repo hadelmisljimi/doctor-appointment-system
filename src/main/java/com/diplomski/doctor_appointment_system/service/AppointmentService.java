@@ -146,15 +146,33 @@ public class AppointmentService {
         AppointmentResponseDTO dto = new AppointmentResponseDTO();
 
         dto.setId(a.getId());
+
         dto.setDoctorId(a.getDoctorId());
-        dto.setDoctorName(doctor != null ? doctor.getName() : "Unknown Doctor");
+
+        // 🔥 DOCTOR DELETED
+        if (doctor != null) {
+            dto.setDoctorName(doctor.getName());
+        } else {
+            dto.setDoctorName("Deleted Doctor");
+            a.setStatus(AppointmentStatus.CANCELLED);
+        }
 
         dto.setPatientId(a.getPatientId());
-        dto.setPatientName(patient != null ? patient.getName() : "Unknown Patient");
+
+        // 🔥 PATIENT DELETED
+        if (patient != null) {
+            dto.setPatientName(patient.getName());
+        } else {
+            dto.setPatientName("Deleted Patient");
+            a.setStatus(AppointmentStatus.CANCELLED);
+        }
 
         dto.setDate(a.getDate());
         dto.setTime(a.getTime());
         dto.setStatus(a.getStatus().name());
+
+        // 🔥 SAVE AUTO CANCEL
+        repository.save(a);
 
         return dto;
     }
@@ -221,12 +239,19 @@ public class AppointmentService {
         validateFutureDate(dto.getDate());
         validateFutureDateTime(dto.getDate(), dto.getTime());
 
-        if (repository.existsByDoctorIdAndDateAndTimeAndStatus(
-                doctorId,
-                dto.getDate(),
-                dto.getTime(),
-                AppointmentStatus.BOOKED
-        )) {
+        boolean alreadyBooked =
+                repository.findAll().stream()
+                        .anyMatch(a ->
+                                a.getDoctorId().equals(doctorId)
+                                        &&
+                                        a.getDate().equals(dto.getDate())
+                                        &&
+                                        a.getTime().equals(dto.getTime())
+                                        &&
+                                        a.getStatus() == AppointmentStatus.BOOKED
+                        );
+
+        if (alreadyBooked) {
             throw new RuntimeException(
                     "This appointment slot is already booked."
             );
@@ -293,4 +318,8 @@ public class AppointmentService {
 
         repository.delete(a);
     }
+
+
+
+
 }

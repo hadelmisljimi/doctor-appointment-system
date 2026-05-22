@@ -4,7 +4,7 @@ import com.diplomski.doctor_appointment_system.dto.AppointmentRequestDTO;
 import com.diplomski.doctor_appointment_system.service.AppointmentService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/api/appointments")
 public class AppointmentController {
@@ -52,4 +52,5 @@ public class AppointmentController {
         service.deleteAppointment(id);
         return ResponseEntity.ok("Appointment deleted successfully");
     }
+
 }

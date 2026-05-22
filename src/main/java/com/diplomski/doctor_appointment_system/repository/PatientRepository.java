@@ -7,11 +7,13 @@ import org.springframework.data.mongodb.repository.Query;
 import java.util.List;
 import java.util.Optional;
 
+
 public interface PatientRepository extends MongoRepository<Patient, String> {
 
     Optional<Patient> findByEmail(String email);
 
     boolean existsByEmail(String email);
+
 
     @Query("""
                 {
@@ -23,4 +25,6 @@ public interface PatientRepository extends MongoRepository<Patient, String> {
                 }
             """)
     List<Patient> searchPatients(String keyword);
+
+
 }

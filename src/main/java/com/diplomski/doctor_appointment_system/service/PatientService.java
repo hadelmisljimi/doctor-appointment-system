@@ -4,6 +4,9 @@ import com.diplomski.doctor_appointment_system.model.Patient;
 import com.diplomski.doctor_appointment_system.dto.PatientRequest;
 import com.diplomski.doctor_appointment_system.repository.PatientRepository;
 import org.springframework.stereotype.Service;
+import com.diplomski.doctor_appointment_system.model.Appointment;
+import com.diplomski.doctor_appointment_system.model.AppointmentStatus;
+import com.diplomski.doctor_appointment_system.repository.AppointmentRepository;
 
 import java.util.List;
 import java.util.UUID;
@@ -12,9 +15,14 @@ import java.util.UUID;
 public class PatientService {
 
     private final PatientRepository repo;
+    private final AppointmentRepository appointmentRepository;
 
-    public PatientService(PatientRepository repo) {
+    public PatientService(
+            PatientRepository repo,
+            AppointmentRepository appointmentRepository
+    ) {
         this.repo = repo;
+        this.appointmentRepository = appointmentRepository;
     }
 
     public List<Patient> getAll() {
@@ -78,11 +86,24 @@ public class PatientService {
     // =========================
     public void delete(String id) {
 
-        if (!repo.existsById(id)) {
-            throw new RuntimeException("Patient not found: " + id);
+        Patient patient = repo.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Patient not found: " + id));
+
+        // FIND ALL APPOINTMENTS FOR THIS PATIENT
+        List<Appointment> appointments =
+                appointmentRepository.findByPatientId(id);
+
+        // MARK ALL AS CANCELLED
+        for (Appointment appointment : appointments) {
+
+            appointment.setStatus(AppointmentStatus.CANCELLED);
+
+            appointmentRepository.save(appointment);
         }
 
-        repo.deleteById(id);
+        // DELETE PATIENT
+        repo.delete(patient);
     }
 
     // =========================
@@ -107,4 +128,5 @@ public class PatientService {
 
         return repo.save(patient);
     }
+
 }
