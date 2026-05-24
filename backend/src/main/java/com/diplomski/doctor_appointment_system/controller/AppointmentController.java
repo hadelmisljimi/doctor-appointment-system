@@ -4,7 +4,7 @@ import com.diplomski.doctor_appointment_system.dto.AppointmentRequestDTO;
 import com.diplomski.doctor_appointment_system.service.AppointmentService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequestMapping("/api/appointments")
 public class AppointmentController {
