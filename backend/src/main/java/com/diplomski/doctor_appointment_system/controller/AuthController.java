@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import com.diplomski.doctor_appointment_system.dto.ResetPasswordRequest;
+import com.diplomski.doctor_appointment_system.model.User;
 @CrossOrigin(origins = "http://localhost:5173")
 @SecurityRequirement(name = "BearerAuth")
 @RestController
@@ -40,5 +42,19 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody AuthRequest request) {
         return ResponseEntity.ok(authService.login(request));
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<String> forgotPassword(
+            @RequestBody ResetPasswordRequest request) {
+
+        return ResponseEntity.ok(
+                authService.resetPassword(request)
+        );
+    }
+    @GetMapping("/color/{username}")
+    public ResponseEntity<String> getUserColor(@PathVariable String username) {
+
+        return ResponseEntity.ok(authService.getUserColor(username));
     }
 }

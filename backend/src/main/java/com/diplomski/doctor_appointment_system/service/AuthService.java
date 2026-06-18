@@ -8,6 +8,7 @@ import com.diplomski.doctor_appointment_system.repository.UserRepository;
 import com.diplomski.doctor_appointment_system.security.JwtUtil;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import com.diplomski.doctor_appointment_system.dto.ResetPasswordRequest;
 
 @Service
 public class AuthService {
@@ -26,11 +27,15 @@ public class AuthService {
         if (repo.findByUsername(req.getUsername()).isPresent()) {
             throw new RuntimeException("User already exists");
         }
+        if (req.getSecurityAnswer() == null || req.getSecurityAnswer().isEmpty()) {
+            throw new RuntimeException("Security answer (color) is required");
+        }
 
         User u = new User();
         u.setUsername(req.getUsername());
         u.setPassword(encoder.encode(req.getPassword()));
         u.setRole(role);
+        u.setSecurityAnswer(req.getSecurityAnswer());
 
         repo.save(u);
 
@@ -57,5 +62,35 @@ public class AuthService {
         String token = jwtUtil.generateToken(u.getUsername(), u.getRole().name());
 
         return new AuthResponse(token, u.getRole().name());
+    }
+
+    public String resetPassword(ResetPasswordRequest req) {
+
+        User user = repo.findByUsername(req.getUsername())
+                .orElseThrow(() ->
+                        new RuntimeException("User not found"));
+
+        if (!user.getSecurityAnswer()
+                .equalsIgnoreCase(req.getSecurityAnswer())) {
+
+            throw new RuntimeException(
+                    "Wrong security answer");
+        }
+
+        user.setPassword(
+                encoder.encode(req.getNewPassword())
+        );
+
+        repo.save(user);
+
+        return "Password changed successfully";
+    }
+
+    public String getUserColor(String username) {
+
+        User user = repo.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return user.getSecurityAnswer();
     }
 }

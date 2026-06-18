@@ -50,6 +50,8 @@ public class SecurityConfig {
                 // AUTH
                 .requestMatchers("/api/auth/register/patient").permitAll()
                 .requestMatchers("/api/auth/login").permitAll()
+                .requestMatchers("/api/auth/color/**").permitAll()
+                .requestMatchers("/api/auth/forgot-password").permitAll()
                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                 .requestMatchers("/api/auth/register/doctor").hasRole("ADMIN")
 

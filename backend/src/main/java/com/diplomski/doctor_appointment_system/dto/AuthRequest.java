@@ -13,11 +13,14 @@ public class AuthRequest {
     @Size(min = 3, max = 100)
     private String password;
 
+    private String securityAnswer;
+
     public AuthRequest() {}
 
-    public AuthRequest(String username, String password) {
+    public AuthRequest(String username, String password, String securityAnswer) {
         this.username = username;
         this.password = password;
+        this.securityAnswer = securityAnswer;
     }
 
     public String getUsername() { return username; }
@@ -25,4 +28,12 @@ public class AuthRequest {
 
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
+
+    public String getSecurityAnswer() {
+        return securityAnswer;
+    }
+
+    public void setSecurityAnswer(String securityAnswer) {
+        this.securityAnswer = securityAnswer;
+    }
 }

@@ -11,14 +11,17 @@ public class User {
 
     private String username;
     private String password; // BCrypt encoded
+
+    private String securityAnswer;
     private Role role;
 
     public User() {}
 
-    public User(String id, String username, String password, Role role) {
+    public User(String id, String username, String password, String securityAnswer, Role role) {
         this.id = id;
         this.username = username;
         this.password = password;
+        this.securityAnswer = securityAnswer;
         this.role = role;
     }
 
@@ -30,6 +33,14 @@ public class User {
 
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
+
+    public String getSecurityAnswer() {
+        return securityAnswer;
+    }
+
+    public void setSecurityAnswer(String securityAnswer) {
+        this.securityAnswer = securityAnswer;
+    }
 
     public Role getRole() { return role; }
     public void setRole(Role role) { this.role = role; }
